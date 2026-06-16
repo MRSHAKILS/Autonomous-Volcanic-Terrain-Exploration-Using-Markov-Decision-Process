@@ -1,0 +1,35 @@
+{
+  "grid_size": {
+    "rows": 10,
+    "columns": 10
+  },
+  "terrain_types": [
+    "safe",
+    "lava",
+    "crater",
+    "gas",
+    "rock",
+    "science_point",
+    "base"
+  ],
+  "default_probabilities": {
+    "safe": 0.50,
+    "lava": 0.10,
+    "crater": 0.08,
+    "gas": 0.07,
+    "rock": 0.15,
+    "science_point": 0.10
+  },
+  "base_location": {
+    "row": 0,
+    "column": 0
+  },
+  "mdp_parameters": {
+    "gamma": 0.90,
+    "movement_probabilities": {
+      "intended_direction": 0.80,
+      "left_drift": 0.10,
+      "right_drift": 0.10
+    }
+  }
+}
