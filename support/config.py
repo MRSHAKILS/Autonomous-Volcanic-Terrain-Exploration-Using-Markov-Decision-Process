@@ -34,3 +34,7 @@ def load_config(config_path: Path = CONFIG_PATH) -> dict:
         raise ValueError(f"Configuration file is missing required section(s): {missing_text}")
 
     return config
+
+
+# TODO: Add detailed value checks for grid size, probabilities, and base
+# location when the terrain generator is implemented in Week 2.

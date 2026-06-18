@@ -7,33 +7,32 @@ from support.utils import print_section_header
 
 
 PROJECT_TITLE = "Autonomous Volcanic Terrain Exploration Using Markov Decision Process (MDP)"
+EXPECTED_WEEK_1_PATHS = [
+    "README.md",
+    "requirements.txt",
+    ".gitignore",
+    "data/.gitkeep",
+    "data/terrain_config.json",
+    "support/__init__.py",
+    "support/config.py",
+    "support/utils.py",
+    "support/terrain.py",
+    "support/mdp.py",
+    "support/agent.py",
+    "support/simulation.py",
+    "support/visualization.py",
+    "support/experiments.py",
+    "outputs/.gitkeep",
+    "others/.gitkeep",
+]
 
 
 def check_repository_structure() -> list[str]:
     """Return a readable status list for the expected Week 1 files and folders."""
-    expected_paths = [
-        "README.md",
-        "requirements.txt",
-        ".gitignore",
-        "data/.gitkeep",
-        "data/terrain_config.json",
-        "support/__init__.py",
-        "support/config.py",
-        "support/utils.py",
-        "support/terrain.py",
-        "support/mdp.py",
-        "support/agent.py",
-        "support/simulation.py",
-        "support/visualization.py",
-        "support/experiments.py",
-        "outputs/.gitkeep",
-        "others/.gitkeep",
-    ]
-
     project_root = Path(__file__).resolve().parent
     status_messages = []
 
-    for relative_path in expected_paths:
+    for relative_path in EXPECTED_WEEK_1_PATHS:
         path = project_root / relative_path
         if path.exists():
             status_messages.append(f"[OK] {relative_path}")
@@ -43,6 +42,17 @@ def check_repository_structure() -> list[str]:
     return status_messages
 
 
+def repository_structure_is_complete() -> bool:
+    """Check whether all expected Week 1 files and folders are present."""
+    project_root = Path(__file__).resolve().parent
+
+    for relative_path in EXPECTED_WEEK_1_PATHS:
+        if not (project_root / relative_path).exists():
+            return False
+
+    return True
+
+
 def main() -> None:
     """Run the Week 1 setup check."""
     print_section_header("Project Title")
@@ -50,8 +60,14 @@ def main() -> None:
 
     print_section_header("Week 1 Setup Status")
     config = load_config()
-    print("[OK] Project skeleton is ready.")
-    print(f"[OK] Terrain configuration loaded for a {config['grid_size']['rows']}x{config['grid_size']['columns']} grid.")
+    if repository_structure_is_complete():
+        print("[OK] Project skeleton is ready.")
+    else:
+        print("[WARNING] Some expected Week 1 files are missing.")
+
+    rows = config["grid_size"]["rows"]
+    columns = config["grid_size"]["columns"]
+    print(f"[OK] Terrain configuration loaded for a {rows}x{columns} grid.")
 
     print_section_header("Repository Structure Status")
     for message in check_repository_structure():

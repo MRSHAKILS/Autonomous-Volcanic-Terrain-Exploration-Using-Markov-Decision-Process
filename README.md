@@ -99,6 +99,15 @@ volcanic-mdp-explorer/
 - Added placeholder files to keep empty folders in Git.
 - Confirmed that the current version runs with `python main.py`.
 
+## Requirements
+
+The current Week 1 script uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
+
+- `numpy`
+- `matplotlib`
+- `pandas`
+- `tqdm`
+
 ## Planned Development Roadmap
 
 - Week 1: Planning and repository setup.

@@ -28,3 +28,7 @@ def load_json(file_path: str | Path) -> dict:
             return json.load(file)
     except json.JSONDecodeError as error:
         raise ValueError(f"Invalid JSON format in file: {path}") from error
+
+
+# TODO: Add result-saving helpers after simulation and experiment outputs are
+# introduced in later weeks.
