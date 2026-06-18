@@ -4,6 +4,14 @@
 
 This repository is for a CSE 440 Artificial Intelligence semester project. The project will study how an autonomous exploration agent can navigate a hazardous volcanic terrain using a Markov Decision Process (MDP).
 
+<p align="center">
+  <img src="images/poster.png" alt="Autonomous Volcanic Terrain Exploration project poster" width="850">
+</p>
+
+<p align="center">
+  <em>Project poster for the autonomous volcanic terrain exploration system.</em>
+</p>
+
 This is the initial Week 1 setup version. The current repository contains the project skeleton, configuration planning, placeholder modules, and a runnable `main.py` file. The full MDP algorithm, terrain generation, simulation, and visualization features are planned for later weeks.
 
 ## Problem Statement
@@ -99,9 +107,17 @@ volcanic-mdp-explorer/
 - Added placeholder files to keep empty folders in Git.
 - Confirmed that the current version runs with `python main.py`.
 
+## Week 2 Progress
+
+- Added a volcanic terrain generator in `support/terrain.py`.
+- Added configurable grid generation using default config values or command-line size input.
+- Added reproducible terrain generation with a random seed.
+- Added CSV export for the generated terrain at `data/sample_terrain_seed_42.csv`.
+- Prepared the environment structure that will be used for MDP implementation in Week 3.
+
 ## Requirements
 
-The current Week 1 script uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
+The current Week 2 demo uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
 
 - `numpy`
 - `matplotlib`
@@ -119,13 +135,21 @@ The current Week 1 script uses only the Python standard library. The following l
 
 ## How to Run Current Version
 
-Run the current Week 1 setup check with:
+Run the current Week 2 terrain demo with:
 
 ```bash
 python main.py
 ```
 
-The program currently prints the project title, setup status, repository structure status, and next development steps.
+Optional arguments:
+
+```bash
+python main.py --seed 10
+python main.py --size 20
+python main.py --seed 15 --size 20
+```
+
+The program prints the generated terrain grid, cell counts, symbol legend, and saves the terrain to `data/sample_terrain_seed_42.csv`.
 
 ## Future Outputs
 
