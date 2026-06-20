@@ -12,7 +12,7 @@ This repository is for a CSE 440 Artificial Intelligence semester project. The p
   <em>Project poster for the autonomous volcanic terrain exploration system.</em>
 </p>
 
-This is the initial Week 1 setup version. The current repository contains the project skeleton, configuration planning, placeholder modules, and a runnable `main.py` file. The full MDP algorithm, terrain generation, simulation, and visualization features are planned for later weeks.
+This is the Week 2 version of the project. The current repository contains the project skeleton, configuration planning, a runnable terrain generator, and a `main.py` demo. The full MDP algorithm, agent simulation, experiments, and visualization features are planned for later weeks.
 
 ## Problem Statement
 
@@ -80,6 +80,7 @@ volcanic-mdp-explorer/
 |-- .gitignore
 |-- data/
 |   |-- .gitkeep
+|   |-- sample_terrain_seed_42.csv
 |   `-- terrain_config.json
 |-- support/
 |   |-- __init__.py
@@ -160,7 +161,7 @@ The following outputs are planned for later weeks:
 - `experiment_results.csv`
 - `demo_video.mp4`
 
-These files are not generated in the Week 1 version.
+These final project files are not generated in the current Week 2 version.
 
 ## Team Contribution Placeholder
 

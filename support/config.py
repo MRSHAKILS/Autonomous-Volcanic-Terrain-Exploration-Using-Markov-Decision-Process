@@ -36,5 +36,5 @@ def load_config(config_path: Path = CONFIG_PATH) -> dict:
     return config
 
 
-# TODO: Add detailed value checks for grid size, probabilities, and base
-# location when the terrain generator is implemented in Week 2.
+# TODO: Add stricter value checks for grid size, probabilities, and base
+# location before the Week 3 MDP uses the configuration for rewards and states.
