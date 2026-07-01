@@ -12,7 +12,7 @@ This repository is for a CSE 440 Artificial Intelligence semester project. The p
   <em>Project poster for the autonomous volcanic terrain exploration system.</em>
 </p>
 
-This is the Week 2 version of the project. The current repository contains the project skeleton, configuration planning, a runnable terrain generator, and a `main.py` demo. The full MDP algorithm, agent simulation, experiments, and visualization features are planned for later weeks.
+This is the Week 3 Prompt 1 version of the project. The current repository contains the project skeleton, configuration planning, a runnable terrain generator, and a core MDP implementation with value iteration. Agent simulation, experiments, and visualization features are planned for later weeks.
 
 ## Problem Statement
 
@@ -58,7 +58,7 @@ The policy will describe the best planned action for each state after the MDP is
 
 ### Value Iteration
 
-Value iteration is planned as the main algorithm for computing state values and deriving an optimal or near-optimal policy. This will be implemented in a later week.
+Value iteration is used as the main algorithm for computing state values and deriving an optimal or near-optimal policy. The first core implementation is included in `support/mdp.py`.
 
 ## Planned Volcanic Terrain Elements
 
@@ -116,9 +116,19 @@ volcanic-mdp-explorer/
 - Added CSV export for the generated terrain at `data/sample_terrain_seed_42.csv`.
 - Prepared the environment structure that will be used for MDP implementation in Week 3.
 
+## Week 3 Progress — MDP Core Implementation
+
+- Implemented the MDP state space using valid non-rock grid cells.
+- Added the action set: `UP`, `DOWN`, `LEFT`, `RIGHT`, `STAY`, and `SCAN`.
+- Added a stochastic transition model with intended movement, slip, and stay probabilities.
+- Added a reward function for safe cells, base, science points, gas, craters, lava, invalid moves, and the scan action.
+- Implemented the value iteration algorithm.
+- Added optimal policy extraction from computed state values.
+- Added basic policy printing and testing from `support/mdp.py`.
+
 ## Requirements
 
-The current Week 2 demo uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
+The current Week 3 Prompt 1 implementation uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
 
 - `numpy`
 - `matplotlib`
@@ -136,7 +146,7 @@ The current Week 2 demo uses only the Python standard library. The following lib
 
 ## How to Run Current Version
 
-Run the current Week 2 terrain demo with:
+Run the current terrain demo with:
 
 ```bash
 python main.py
@@ -152,6 +162,14 @@ python main.py --seed 15 --size 20
 
 The program prints the generated terrain grid, cell counts, symbol legend, and saves the terrain to `data/sample_terrain_seed_42.csv`.
 
+Run the Week 3 MDP core implementation test with:
+
+```bash
+python support/mdp.py
+```
+
+This prints the number of valid MDP states and a basic policy grid. It does not run a full agent simulation yet.
+
 ## Future Outputs
 
 The following outputs are planned for later weeks:
@@ -161,7 +179,7 @@ The following outputs are planned for later weeks:
 - `experiment_results.csv`
 - `demo_video.mp4`
 
-These final project files are not generated in the current Week 2 version.
+These final project files are not generated in the current Week 3 Prompt 1 version.
 
 ## Team Contribution Placeholder
 
