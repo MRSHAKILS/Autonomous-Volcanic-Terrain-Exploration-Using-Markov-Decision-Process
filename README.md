@@ -12,7 +12,7 @@ This repository is for a CSE 440 Artificial Intelligence semester project. The p
   <em>Project poster for the autonomous volcanic terrain exploration system.</em>
 </p>
 
-This is the Week 3 Prompt 1 version of the project. The current repository contains the project skeleton, configuration planning, a runnable terrain generator, and a core MDP implementation with value iteration. Agent simulation, experiments, and visualization features are planned for later weeks.
+This is the Week 3 Prompt 1 version of the project. The current repository contains the project skeleton, configuration planning, a runnable terrain generator, and a core MDP implementation with value iteration. Agent movement, full simulation, experiments, and visualization features are planned for later weeks.
 
 ## Problem Statement
 
@@ -34,27 +34,27 @@ An MDP provides a structured way to represent:
 
 This makes MDP a good fit for modeling volcanic terrain exploration as a decision-making problem.
 
-## Planned AI Formulation
+## Current and Planned AI Formulation
 
 ### States
 
-Each state will represent the agent's position in the terrain grid. A state may later include additional information such as collected science points or hazard conditions.
+Each current state represents the agent's position in the terrain grid as `(row, col)`. Rock cells are treated as obstacles and are not included as valid MDP states. A state may later include additional information such as collected science points or changing hazard conditions.
 
 ### Actions
 
-The planned actions are movement choices such as moving up, down, left, or right. Staying in place may also be considered if needed for safety or analysis.
+The current action set includes `UP`, `DOWN`, `LEFT`, `RIGHT`, `STAY`, and `SCAN`. The `SCAN` action is included as a Week 3 placeholder for later hazard-detection behavior.
 
 ### Transition Probabilities
 
-Transition probabilities will model uncertainty in movement. For example, the agent may move in the intended direction with high probability, but may drift left or right with smaller probabilities because of unstable terrain.
+Transition probabilities model uncertainty in movement. The current MDP uses intended movement, left slip, right slip, and stay probabilities. If a movement would go outside the grid or into a rock cell, the agent remains in the same state.
 
 ### Rewards
 
-Rewards will guide the agent's behavior. Science points will provide positive rewards, while hazardous cells such as lava, craters, or gas zones will provide penalties. Safe cells may have small neutral or movement costs.
+Rewards guide the agent's behavior. Science points and the base station provide positive rewards, while hazardous cells such as lava, craters, and gas zones provide penalties. Invalid blocked movement and scanning also have costs.
 
 ### Policy
 
-The policy will describe the best planned action for each state after the MDP is solved.
+The policy describes the best planned action for each valid state after value iteration has estimated state values.
 
 ### Value Iteration
 
@@ -98,7 +98,7 @@ volcanic-mdp-explorer/
     `-- .gitkeep
 ```
 
-## Current Week 1 Progress
+## Week 1 Progress
 
 - Created the basic repository structure.
 - Added a runnable `main.py` setup check.
@@ -116,7 +116,7 @@ volcanic-mdp-explorer/
 - Added CSV export for the generated terrain at `data/sample_terrain_seed_42.csv`.
 - Prepared the environment structure that will be used for MDP implementation in Week 3.
 
-## Week 3 Progress — MDP Core Implementation
+## Week 3 Progress - MDP Core Implementation
 
 - Implemented the MDP state space using valid non-rock grid cells.
 - Added the action set: `UP`, `DOWN`, `LEFT`, `RIGHT`, `STAY`, and `SCAN`.
@@ -170,6 +170,13 @@ python support/mdp.py
 
 This prints the number of valid MDP states and a basic policy grid. It does not run a full agent simulation yet.
 
+## Current Limitations
+
+- The project does not yet include a full agent movement simulation.
+- Dynamic hazards are not implemented yet.
+- Visualization and comparison experiments are planned for later weeks.
+- Final report, slides, demo video, and polished output files are not complete yet.
+
 ## Future Outputs
 
 The following outputs are planned for later weeks:
@@ -187,7 +194,7 @@ Team member contributions will be added as the project develops.
 
 | Team Member | Planned Contribution | Status |
 | --- | --- | --- |
-| Member 1 | Project planning and repository setup | Week 1 in progress |
-| Member 2 | Terrain generation and configuration | Planned |
-| Member 3 | MDP formulation and value iteration | Planned |
+| Member 1 | Project planning and repository setup | Week 1 complete |
+| Member 2 | Terrain generation and configuration | Week 2 complete |
+| Member 3 | MDP formulation and value iteration | Week 3 Prompt 1 complete |
 | Member 4 | Simulation, visualization, and experiments | Planned |
