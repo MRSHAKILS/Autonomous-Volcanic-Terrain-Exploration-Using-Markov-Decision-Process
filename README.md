@@ -139,6 +139,24 @@ The experiment module in `support/experiments.py` compares the MDP explorer agai
 
 The MDP agent follows the value-iteration policy and re-plans after each science sample is collected. Once a sample is gathered its cell becomes ordinary ground, so the agent keeps exploring toward new objectives instead of scoring the same cell repeatedly. Across the 20 terrains the MDP agent earns the highest reward, enters the fewest hazards, collects the most science, and survives most often. The greedy agent covers more ground but walks into far more hazards and dies more often, and the random agent performs worst overall. No MDP, terrain, agent, or simulation code was changed; the experiments only use the existing public methods of those modules.
 
+## Terrain Visualization
+
+`support/visualization.py` renders the terrain grid with matplotlib, using a distinct color for each of the seven cell types (Safe, Lava, Crater, Gas, Rock, Science, Base) plus a title and legend. A few examples generated from different random seeds:
+
+<p align="center">
+  <img src="images/terrain_map_seed_1.png" alt="Volcanic terrain map, seed 1" width="270">
+  <img src="images/terrain_map_seed_7.png" alt="Volcanic terrain map, seed 7" width="270">
+  <img src="images/terrain_map_seed_23.png" alt="Volcanic terrain map, seed 23" width="270">
+</p>
+
+Run it with:
+
+```bash
+python support/visualization.py
+```
+
+This saves the default terrain map to `outputs/final_map.png`.
+
 ## Requirements
 
 The current Week 3 Prompt 1 implementation uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
@@ -195,7 +213,7 @@ This runs the MDP, random, and greedy agents over 20 seeds and writes `outputs/e
 
 - The project does not yet include a full agent movement simulation module.
 - Dynamic hazards are not implemented yet.
-- Visualization (`support/visualization.py`) is planned for a later week.
+- Visualization (`support/visualization.py`) currently renders the terrain grid only; drawing the agent's real path is planned for a later week.
 - Final report, slides, demo video, and polished output files are not complete yet.
 
 ## Future Outputs
@@ -204,10 +222,10 @@ The experiment module now generates these output files when `support/experiments
 
 - `outputs/experiment_results.csv`
 - `outputs/performance_plot.png`
+- `outputs/final_map.png`
 
 The following outputs are still planned for later weeks:
 
-- `final_map.png`
 - `demo_video.mp4`
 
 ## Team Contribution Placeholder
