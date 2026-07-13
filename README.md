@@ -12,7 +12,7 @@ This repository is for a CSE 440 Artificial Intelligence semester project. The p
   <em>Project poster for the autonomous volcanic terrain exploration system.</em>
 </p>
 
-This is the Week 3 Prompt 1 version of the project. The current repository contains the project skeleton, configuration planning, a runnable terrain generator, and a core MDP implementation with value iteration. Agent movement, full simulation, experiments, and visualization features are planned for later weeks.
+The current repository contains the project skeleton, configuration planning, a runnable terrain generator, a core MDP implementation with value iteration, and a baseline comparison experiment that evaluates the MDP explorer against simple agents. Agent movement, full simulation, and visualization features are planned for later weeks.
 
 ## Problem Statement
 
@@ -126,6 +126,19 @@ volcanic-mdp-explorer/
 - Added optimal policy extraction from computed state values.
 - Added basic policy printing and testing from `support/mdp.py`.
 
+## Week 5 Progress - Experiments and Comparison
+
+The experiment module in `support/experiments.py` compares the MDP explorer against two baseline strategies on the same volcanic maps, using multiple random seeds.
+
+- Compared three agents: the MDP policy agent, a random-movement agent, and a greedy nearest-unvisited agent.
+- Built the two baselines on top of Member 2's `MDPExplorerAgent` (`support/agent.py`); they are thin subclasses that only change how the next action is chosen, so every agent is measured by the exact same code.
+- Ran all three agents over 20 seeded terrains under the same stochastic movement model, so the comparison is fair.
+- Used the discount factor `gamma = 0.90` declared in `data/terrain_config.json`.
+- Recorded per-run metrics: total reward, coverage percent, hazards entered, science points collected, survival, and total steps.
+- Saved one row per run to `outputs/experiment_results.csv` and an averaged bar-chart comparison to `outputs/performance_plot.png`.
+
+The MDP agent follows the value-iteration policy and re-plans after each science sample is collected. Once a sample is gathered its cell becomes ordinary ground, so the agent keeps exploring toward new objectives instead of scoring the same cell repeatedly. Across the 20 terrains the MDP agent earns the highest reward, enters the fewest hazards, collects the most science, and survives most often. The greedy agent covers more ground but walks into far more hazards and dies more often, and the random agent performs worst overall. No MDP, terrain, agent, or simulation code was changed; the experiments only use the existing public methods of those modules.
+
 ## Requirements
 
 The current Week 3 Prompt 1 implementation uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
@@ -170,23 +183,32 @@ python support/mdp.py
 
 This prints the number of valid MDP states and a basic policy grid. It does not run a full agent simulation yet.
 
+Run the Week 5 experiment comparison with:
+
+```bash
+python support/experiments.py
+```
+
+This runs the MDP, random, and greedy agents over 20 seeds and writes `outputs/experiment_results.csv` and `outputs/performance_plot.png`.
+
 ## Current Limitations
 
-- The project does not yet include a full agent movement simulation.
+- The project does not yet include a full agent movement simulation module.
 - Dynamic hazards are not implemented yet.
-- Visualization and comparison experiments are planned for later weeks.
+- Visualization (`support/visualization.py`) is planned for a later week.
 - Final report, slides, demo video, and polished output files are not complete yet.
 
 ## Future Outputs
 
-The following outputs are planned for later weeks:
+The experiment module now generates these output files when `support/experiments.py` is run:
+
+- `outputs/experiment_results.csv`
+- `outputs/performance_plot.png`
+
+The following outputs are still planned for later weeks:
 
 - `final_map.png`
-- `performance_plot.png`
-- `experiment_results.csv`
 - `demo_video.mp4`
-
-These final project files are not generated in the current Week 3 Prompt 1 version.
 
 ## Team Contribution Placeholder
 
@@ -197,4 +219,4 @@ Team member contributions will be added as the project develops.
 | Member 1 | Project planning and repository setup | Week 1 complete |
 | Member 2 | Terrain generation and configuration | Week 2 complete |
 | Member 3 | MDP formulation and value iteration | Week 3 Prompt 1 complete |
-| Member 4 | Simulation, visualization, and experiments | Planned |
+| Member 4 | Baseline experiments and performance comparison | Experiments complete |
