@@ -1,8 +1,26 @@
 # Autonomous Volcanic Terrain Exploration Using Markov Decision Process (MDP)
 
+## Project Information
+
+| Item | Details |
+| --- | --- |
+| Course | CSE 440 — Artificial Intelligence |
+| Section | 1 |
+| Group | 5 |
+| Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb] |
+
+## Team Members
+
+| Member   | Name           | Primary Responsibility                                                                                   |
+| -------- | -------------- | -------------------------------------------------------------------------------------------------------- |
+| Member 1 | Shakil Ahmed   | Repository foundation, terrain generation, MDP core, value iteration, policy extraction, and integration |
+| Member 2 | Fahim Foysal   | Autonomous agent and simulation                                                                          |
+| Member 3 | Shefa Tabassum | Terrain visualization and demo outputs                                                                   |
+| Member 4 | Tanvir Ahmed   | Experiments, baseline comparison, and performance analysis                                               |
+
 ## Short Overview
 
-This repository is for a CSE 440 Artificial Intelligence semester project. The project will study how an autonomous exploration agent can navigate a hazardous volcanic terrain using a Markov Decision Process (MDP).
+This repository is for a CSE 440 Artificial Intelligence semester project. The project studies how an autonomous exploration agent can navigate hazardous volcanic terrain using a Markov Decision Process (MDP).
 
 <p align="center">
   <img src="images/poster.png" alt="Autonomous Volcanic Terrain Exploration project poster" width="850">
@@ -12,63 +30,59 @@ This repository is for a CSE 440 Artificial Intelligence semester project. The p
   <em>Project poster for the autonomous volcanic terrain exploration system.</em>
 </p>
 
-The current repository contains the project skeleton, configuration planning, a runnable terrain generator, a core MDP implementation with value iteration, and a baseline comparison experiment that evaluates the MDP explorer against simple agents. Agent movement, full simulation, and visualization features are planned for later weeks.
+Update 1 code from all four members has been merged. The current implementation includes volcanic terrain generation, the core MDP model, value iteration, policy extraction, an MDP-based explorer agent, a simulation loop, terrain visualization, and baseline experiment outputs. Dynamic hazards and final demo/report materials are not complete yet.
 
 ## Problem Statement
 
-Volcanic environments are dangerous, uncertain, and difficult for humans to explore directly. An autonomous agent operating in this type of environment must make decisions while considering hazards such as lava flows, craters, gas emission zones, and obstacles. At the same time, it should collect useful scientific information and return or remain connected to a base station when needed.
+Volcanic environments are dangerous, uncertain, and difficult for humans to explore directly. An autonomous agent operating in this type of environment must make decisions while considering hazards such as lava flows, craters, gas-emission zones, and obstacles. At the same time, it should collect useful scientific information and remain connected to a base station when needed.
 
-The problem is to design an AI-based exploration system that can decide where the agent should move in a grid-based volcanic terrain while balancing safety, exploration, and scientific reward.
+The problem is to design an AI-based exploration system that decides where the agent should move in a grid-based volcanic terrain while balancing safety, exploration, and scientific reward.
 
 ## Why MDP Is Suitable
 
-A Markov Decision Process is suitable for this project because the agent must make sequential decisions under uncertainty. Each movement action may not always lead exactly where intended because of terrain difficulty, sensor limitations, or environmental instability.
+A Markov Decision Process is suitable for this project because the agent must make sequential decisions under uncertainty. Each movement action may not always lead exactly where intended because of terrain difficulty or environmental instability.
 
 An MDP provides a structured way to represent:
 
-- The current state of the agent.
-- The possible actions available to the agent.
-- The probability of reaching the next state after an action.
-- The reward or penalty for entering different terrain cells.
-- A policy that recommends the best action for each state.
+- the current state of the agent,
+- the possible actions available to the agent,
+- the probability of reaching the next state after an action,
+- the reward or penalty for entering different terrain cells,
+- and a policy that recommends the best action for each state.
 
-This makes MDP a good fit for modeling volcanic terrain exploration as a decision-making problem.
-
-## Current and Planned AI Formulation
+## Current AI Formulation
 
 ### States
 
-Each current state represents the agent's position in the terrain grid as `(row, col)`. Rock cells are treated as obstacles and are not included as valid MDP states. A state may later include additional information such as collected science points or changing hazard conditions.
+Each state represents the agent's position in the terrain grid as `(row, col)`. Rock cells are treated as obstacles and are excluded from the valid MDP state space.
 
 ### Actions
 
-The current action set includes `UP`, `DOWN`, `LEFT`, `RIGHT`, `STAY`, and `SCAN`. The `SCAN` action is included as a Week 3 placeholder for later hazard-detection behavior.
+The current action set includes `UP`, `DOWN`, `LEFT`, `RIGHT`, `STAY`, and `SCAN`.
 
 ### Transition Probabilities
 
-Transition probabilities model uncertainty in movement. The current MDP uses intended movement, left slip, right slip, and stay probabilities. If a movement would go outside the grid or into a rock cell, the agent remains in the same state.
+Transition probabilities model uncertainty in movement. The MDP uses intended movement, left slip, right slip, and stay probabilities. If a movement would go outside the grid or into a rock cell, the agent remains in the same state.
 
 ### Rewards
 
 Rewards guide the agent's behavior. Science points and the base station provide positive rewards, while hazardous cells such as lava, craters, and gas zones provide penalties. Invalid blocked movement and scanning also have costs.
 
-### Policy
+### Policy and Value Iteration
 
-The policy describes the best planned action for each valid state after value iteration has estimated state values.
+Value iteration estimates state values, and the resulting policy selects the best action for each valid state.
 
-### Value Iteration
+## Terrain Symbols
 
-Value iteration is used as the main algorithm for computing state values and deriving an optimal or near-optimal policy. The first core implementation is included in `support/mdp.py`.
-
-## Planned Volcanic Terrain Elements
-
-- Safe cells: Areas where the agent can move with low risk.
-- Lava flows: High-risk areas that should usually be avoided.
-- Craters: Dangerous terrain with strong movement or safety penalties.
-- Gas emission zones: Hazardous cells that may reduce safety or visibility.
-- Rocks/obstacles: Blocked or difficult cells that restrict movement.
-- Science points: Valuable locations that the agent should try to explore.
-- Base station: The starting location and possible reference point for mission planning.
+| Character | Meaning               |
+| --------- | --------------------- |
+| `.`       | Safe traversable cell |
+| `L`       | Lava flow             |
+| `C`       | Crater                |
+| `G`       | Gas-emission zone     |
+| `R`       | Rock or obstacle      |
+| `S`       | Science point         |
+| `B`       | Base station          |
 
 ## Repository Structure
 
@@ -82,6 +96,11 @@ volcanic-mdp-explorer/
 |   |-- .gitkeep
 |   |-- sample_terrain_seed_42.csv
 |   `-- terrain_config.json
+|-- images/
+|   |-- poster.png
+|   |-- terrain_map_seed_1.png
+|   |-- terrain_map_seed_7.png
+|   `-- terrain_map_seed_23.png
 |-- support/
 |   |-- __init__.py
 |   |-- config.py
@@ -93,78 +112,159 @@ volcanic-mdp-explorer/
 |   |-- visualization.py
 |   `-- experiments.py
 |-- outputs/
-|   `-- .gitkeep
+|   |-- .gitkeep
+|   |-- experiment_results.csv
+|   |-- final_map.png
+|   `-- performance_plot.png
 `-- others/
     `-- .gitkeep
 ```
 
-## Week 1 Progress
+## Update 1 Progress
 
-- Created the basic repository structure.
-- Added a runnable `main.py` setup check.
-- Added `requirements.txt` with planned basic libraries.
-- Added `data/terrain_config.json` with initial terrain and MDP parameters.
-- Added support modules for future terrain, MDP, agent, simulation, visualization, and experiments work.
-- Added placeholder files to keep empty folders in Git.
-- Confirmed that the current version runs with `python main.py`.
+Update 1 code from all four members has been merged.
 
-## Week 2 Progress
+### Member 1 — MDP Core
 
-- Added a volcanic terrain generator in `support/terrain.py`.
-- Added configurable grid generation using default config values or command-line size input.
-- Added reproducible terrain generation with a random seed.
-- Added CSV export for the generated terrain at `data/sample_terrain_seed_42.csv`.
-- Prepared the environment structure that will be used for MDP implementation in Week 3.
+- Repository and project structure
+- Configuration system
+- Volcanic terrain generator
+- State and action definitions
+- Reward model
+- Stochastic transition model
+- Value iteration
+- Optimal policy extraction
 
-## Week 3 Progress - MDP Core Implementation
+### Member 2 — Agent and Simulation
 
-- Implemented the MDP state space using valid non-rock grid cells.
-- Added the action set: `UP`, `DOWN`, `LEFT`, `RIGHT`, `STAY`, and `SCAN`.
-- Added a stochastic transition model with intended movement, slip, and stay probabilities.
-- Added a reward function for safe cells, base, science points, gas, craters, lava, invalid moves, and the scan action.
-- Implemented the value iteration algorithm.
-- Added optimal policy extraction from computed state values.
-- Added basic policy printing and testing from `support/mdp.py`.
+- `MDPExplorerAgent`
+- BASE-position initialization
+- Policy-based action selection
+- Stochastic movement
+- Path and visited-cell tracking
+- Reward, hazard, science-point, and survival tracking
+- Mission summary and simulation loop
 
-## Week 5 Progress - Experiments and Comparison
+### Member 3 — Visualization
 
-The experiment module in `support/experiments.py` compares the MDP explorer against two baseline strategies on the same volcanic maps, using multiple random seeds.
+- Matplotlib-based terrain rendering
+- Distinct colors for all seven terrain types
+- Map title and legend
+- Saved visualization output
+- Terrain examples generated with different random seeds
 
-- Compared three agents: the MDP policy agent, a random-movement agent, and a greedy nearest-unvisited agent.
-- Built the two baselines on top of Member 2's `MDPExplorerAgent` (`support/agent.py`); they are thin subclasses that only change how the next action is chosen, so every agent is measured by the exact same code.
-- Ran all three agents over 20 seeded terrains under the same stochastic movement model, so the comparison is fair.
-- Used the discount factor `gamma = 0.90` declared in `data/terrain_config.json`.
-- Recorded per-run metrics: total reward, coverage percent, hazards entered, science points collected, survival, and total steps.
-- Saved one row per run to `outputs/experiment_results.csv` and an averaged bar-chart comparison to `outputs/performance_plot.png`.
+### Member 4 — Experiments
 
-The MDP agent follows the value-iteration policy and re-plans after each science sample is collected. Once a sample is gathered its cell becomes ordinary ground, so the agent keeps exploring toward new objectives instead of scoring the same cell repeatedly. Across the 20 terrains the MDP agent earns the highest reward, enters the fewest hazards, collects the most science, and survives most often. The greedy agent covers more ground but walks into far more hazards and dies more often, and the random agent performs worst overall. No MDP, terrain, agent, or simulation code was changed; the experiments only use the existing public methods of those modules.
+- MDP, random, and greedy comparison structure
+- Shared experiment metrics
+- CSV results generation
+- Performance-plot generation
 
-## Terrain Visualization
+## Generated Results and Visuals
 
-`support/visualization.py` renders the terrain grid with matplotlib, using a distinct color for each of the seven cell types (Safe, Lava, Crater, Gas, Rock, Science, Base) plus a title and legend. A few examples generated from different random seeds:
+### Exploration Map
+
+![Volcanic terrain exploration map](outputs/final_map.png)
 
 <p align="center">
-  <img src="images/terrain_map_seed_1.png" alt="Volcanic terrain map, seed 1" width="270">
-  <img src="images/terrain_map_seed_7.png" alt="Volcanic terrain map, seed 7" width="270">
-  <img src="images/terrain_map_seed_23.png" alt="Volcanic terrain map, seed 23" width="270">
+  <em>Update 1 test visualization of the volcanic terrain. The dashed route is labeled in the image as a sample path for layout testing, not a final autonomous-agent result.</em>
 </p>
 
-Run it with:
+### Performance Comparison
 
-```bash
-python support/visualization.py
-```
+![Agent performance comparison](outputs/performance_plot.png)
 
-This saves the default terrain map to `outputs/final_map.png`.
+<p align="center">
+  <em>Generated comparison visualization for the implemented experiment framework.</em>
+</p>
+
+### Terrain Visualization
+
+`support/visualization.py` renders the terrain grid with matplotlib, using a distinct color for each of the seven cell types—Safe, Lava, Crater, Gas, Rock, Science, and Base—together with a title and legend. The following examples were generated using different random seeds.
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="images/terrain_map_seed_1.png" width="300"><br>
+      <sub>Terrain Example 1</sub>
+    </td>
+    <td align="center">
+      <img src="images/terrain_map_seed_7.png" width="300"><br>
+      <sub>Terrain Example 2</sub>
+    </td>
+    <td align="center">
+      <img src="images/terrain_map_seed_23.png" width="300"><br>
+      <sub>Terrain Example 3</sub>
+    </td>
+  </tr>
+</table>
 
 ## Requirements
 
-The current Week 3 Prompt 1 implementation uses only the Python standard library. The following libraries are listed in `requirements.txt` because they are expected to be useful in later stages:
+Install the project dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+The dependency list currently includes:
 
 - `numpy`
 - `matplotlib`
 - `pandas`
 - `tqdm`
+
+## How to Run
+
+Run the terrain demo:
+
+```bash
+python main.py
+```
+
+Optional terrain arguments:
+
+```bash
+python main.py --seed 10
+python main.py --size 20
+python main.py --seed 15 --size 20
+```
+
+Run the MDP core test:
+
+```bash
+python support/mdp.py
+```
+
+Run the agent demo:
+
+```bash
+python support/agent.py
+```
+
+Run the simulation loop:
+
+```bash
+python support/simulation.py
+```
+
+Generate the terrain visualization:
+
+```bash
+python support/visualization.py
+```
+
+Run the experiment comparison:
+
+```bash
+python support/experiments.py
+```
+
+## Current Limitations
+
+- Dynamic hazards are not implemented yet.
+- The exploration map currently uses a sample/test path, not a final simulation path.
+- Final report, slides, demo video, and presentation polish are not complete yet.
 
 ## Planned Development Roadmap
 
@@ -175,66 +275,14 @@ The current Week 3 Prompt 1 implementation uses only the Python standard library
 - Week 5: Visualization and comparison experiments.
 - Week 6: Demo, report, slides, and final polish.
 
-## How to Run Current Version
-
-Run the current terrain demo with:
-
-```bash
-python main.py
-```
-
-Optional arguments:
-
-```bash
-python main.py --seed 10
-python main.py --size 20
-python main.py --seed 15 --size 20
-```
-
-The program prints the generated terrain grid, cell counts, symbol legend, and saves the terrain to `data/sample_terrain_seed_42.csv`.
-
-Run the Week 3 MDP core implementation test with:
-
-```bash
-python support/mdp.py
-```
-
-This prints the number of valid MDP states and a basic policy grid. It does not run a full agent simulation yet.
-
-Run the Week 5 experiment comparison with:
-
-```bash
-python support/experiments.py
-```
-
-This runs the MDP, random, and greedy agents over 20 seeds and writes `outputs/experiment_results.csv` and `outputs/performance_plot.png`.
-
-## Current Limitations
-
-- The project does not yet include a full agent movement simulation module.
-- Dynamic hazards are not implemented yet.
-- Visualization (`support/visualization.py`) currently renders the terrain grid only; drawing the agent's real path is planned for a later week.
-- Final report, slides, demo video, and polished output files are not complete yet.
-
 ## Future Outputs
 
-The experiment module now generates these output files when `support/experiments.py` is run:
+Generated output files currently include:
 
 - `outputs/experiment_results.csv`
 - `outputs/performance_plot.png`
 - `outputs/final_map.png`
 
-The following outputs are still planned for later weeks:
+The following output is still planned for later:
 
 - `demo_video.mp4`
-
-## Team Contribution Placeholder
-
-Team member contributions will be added as the project develops.
-
-| Team Member | Planned Contribution | Status |
-| --- | --- | --- |
-| Member 1 | Project planning and repository setup | Week 1 complete |
-| Member 2 | Terrain generation and configuration | Week 2 complete |
-| Member 3 | MDP formulation and value iteration | Week 3 Prompt 1 complete |
-| Member 4 | Baseline experiments and performance comparison | Experiments complete |
