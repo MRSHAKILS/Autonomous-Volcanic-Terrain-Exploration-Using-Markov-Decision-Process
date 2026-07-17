@@ -2,12 +2,12 @@
 
 ## Project Information
 
-| Item | Details |
-| --- | --- |
-| Course | CSE 440 â€” Artificial Intelligence |
-| Section | 1 |
-| Group | 5 |
-| Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb] |
+| Item       | Details                             |
+| ---------- | ----------------------------------- |
+| Course     | CSE 440 â€” Artificial Intelligence |
+| Section    | 1                                   |
+| Group      | 5                                   |
+| Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb]  |
 
 ## Team Members
 
@@ -186,7 +186,7 @@ Update 1 code from all four members has been merged.
 ### Exploration Map
 
 <p align="center">
-  <img src="outputs/final_map.png" alt="Volcanic terrain exploration map" width="850">
+  <img src="images/final_map.png" alt="Volcanic terrain exploration map" width="850">
 </p>
 
 <p align="center">
@@ -196,7 +196,7 @@ Update 1 code from all four members has been merged.
 ### Performance Comparison
 
 <p align="center">
-  <img src="outputs/performance_plot.png" alt="Agent performance comparison" width="850">
+  <img src="images/performance_plot.png" alt="Agent performance comparison" width="850">
 </p>
 
 <p align="center">
@@ -290,4 +290,3 @@ Generated output files currently include:
 The following output is still planned for later:
 
 - `demo_video.mp4`
-
