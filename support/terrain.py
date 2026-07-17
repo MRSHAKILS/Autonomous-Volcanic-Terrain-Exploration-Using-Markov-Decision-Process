@@ -78,10 +78,10 @@ class Terrain:
         self.grid = self._create_empty_grid()
 
     def _load_default_config(self) -> dict:
-        """Load terrain settings from the project config file if it exists."""
+        """Load terrain settings, falling back only when the config is missing."""
         try:
             return load_config()
-        except (FileNotFoundError, ValueError):
+        except FileNotFoundError:
             return {}
 
     def _get_config_grid_value(self, key: str, default: int) -> int:
@@ -290,9 +290,8 @@ class Terrain:
             print(" ".join(symbols))
 
 
-# TODO: In Week 3, connect this terrain representation to the MDP state space.
-# TODO: In Week 4, allow hazards to change during simulation if dynamic terrain
-# behavior is needed.
+# TODO: In a later update, allow hazards to change during simulation if dynamic
+# terrain behavior is needed.
 
 
 if __name__ == "__main__":

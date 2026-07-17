@@ -16,6 +16,7 @@ from pathlib import Path
 if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
+from support.config import get_mdp_parameters
 from support.terrain import BASE, CRATER, GAS, LAVA, ROCK, SAFE, SCIENCE, Terrain
 
 
@@ -65,18 +66,29 @@ POLICY_SYMBOLS = {
 class VolcanicMDP:
     """Represent the volcanic terrain as a Markov Decision Process."""
 
-    def __init__(self, terrain: Terrain, gamma: float = 0.92) -> None:
+    def __init__(self, terrain: Terrain, gamma: float | None = None) -> None:
         """Create an MDP from an existing terrain grid.
 
         Args:
             terrain: A generated Terrain object.
-            gamma: Discount factor for future rewards.
+            gamma: Optional discount factor. If omitted, config/default is used.
         """
         self.terrain = terrain
-        self.gamma = gamma
+        self.mdp_parameters = get_mdp_parameters()
+        self.gamma = self._select_gamma(gamma)
+        self.movement_probabilities = self.mdp_parameters["movement_probabilities"]
         self.states = self._build_states()
         self.values = {state: 0.0 for state in self.states}
         self.policy = {}
+
+    def _select_gamma(self, gamma: float | None) -> float:
+        """Use an explicit gamma if provided; otherwise use the config value."""
+        selected_gamma = self.mdp_parameters["gamma"] if gamma is None else gamma
+
+        if not isinstance(selected_gamma, (int, float)) or not 0 < selected_gamma < 1:
+            raise ValueError("gamma must be a number between 0 and 1.")
+
+        return float(selected_gamma)
 
     def _build_states(self) -> list[tuple[int, int]]:
         """Create one state for each valid non-rock grid cell."""
@@ -133,10 +145,10 @@ class VolcanicMDP:
 
         left_slip, right_slip = SLIP_ACTIONS[action]
         movement_outcomes = [
-            (self.move(state, action), 0.75),
-            (self.move(state, left_slip), 0.10),
-            (self.move(state, right_slip), 0.10),
-            (state, 0.05),
+            (self.move(state, action), self.movement_probabilities["intended_direction"]),
+            (self.move(state, left_slip), self.movement_probabilities["left_drift"]),
+            (self.move(state, right_slip), self.movement_probabilities["right_drift"]),
+            (state, self.movement_probabilities["stay"]),
         ]
 
         probabilities = {}
@@ -262,9 +274,8 @@ class VolcanicMDP:
             print(" ".join(symbols))
 
 
-# TODO: In Week 3 Part 2, connect the policy to a simple agent decision loop.
-# TODO: In later weeks, consider dynamic hazards, visual policy maps, and
-# experiment comparisons.
+# TODO: In later updates, consider dynamic hazards and richer visual policy
+# maps without changing the public MDP interface.
 
 
 if __name__ == "__main__":

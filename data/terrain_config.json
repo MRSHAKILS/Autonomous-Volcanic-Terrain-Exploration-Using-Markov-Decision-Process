@@ -27,9 +27,10 @@
   "mdp_parameters": {
     "gamma": 0.90,
     "movement_probabilities": {
-      "intended_direction": 0.80,
+      "intended_direction": 0.75,
       "left_drift": 0.10,
-      "right_drift": 0.10
+      "right_drift": 0.10,
+      "stay": 0.05
     }
   }
 }
