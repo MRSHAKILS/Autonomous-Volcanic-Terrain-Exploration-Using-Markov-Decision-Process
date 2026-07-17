@@ -1,10 +1,10 @@
-# Autonomous Volcanic Terrain Exploration Using Markov Decision Process (MDP)
+﻿# Autonomous Volcanic Terrain Exploration Using Markov Decision Process (MDP)
 
 ## Project Information
 
 | Item | Details |
 | --- | --- |
-| Course | CSE 440 — Artificial Intelligence |
+| Course | CSE 440 â€” Artificial Intelligence |
 | Section | 1 |
 | Group | 5 |
 | Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb] |
@@ -124,7 +124,7 @@ volcanic-mdp-explorer/
 
 Update 1 code from all four members has been merged.
 
-### Member 1 — MDP Core
+### Member 1 â€” MDP Core
 
 - Repository and project structure
 - Configuration system
@@ -135,7 +135,7 @@ Update 1 code from all four members has been merged.
 - Value iteration
 - Optimal policy extraction
 
-### Member 2 — Agent and Simulation
+### Member 2 â€” Agent and Simulation
 
 - `MDPExplorerAgent`
 - BASE-position initialization
@@ -145,7 +145,7 @@ Update 1 code from all four members has been merged.
 - Reward, hazard, science-point, and survival tracking
 - Mission summary and simulation loop
 
-### Member 3 — Visualization
+### Member 3 â€” Visualization
 
 - Matplotlib-based terrain rendering
 - Distinct colors for all seven terrain types
@@ -153,7 +153,7 @@ Update 1 code from all four members has been merged.
 - Saved visualization output
 - Terrain examples generated with different random seeds
 
-### Member 4 — Experiments
+### Member 4 â€” Experiments
 
 - MDP, random, and greedy comparison structure
 - Shared experiment metrics
@@ -161,22 +161,6 @@ Update 1 code from all four members has been merged.
 - Performance-plot generation
 
 ## Generated Results and Visuals
-
-### Exploration Map
-
-![Volcanic terrain exploration map](outputs/final_map.png)
-
-<p align="center">
-  <em>Update 1 test visualization of the volcanic terrain. The dashed route is labeled in the image as a sample path for layout testing, not a final autonomous-agent result.</em>
-</p>
-
-### Performance Comparison
-
-![Agent performance comparison](outputs/performance_plot.png)
-
-<p align="center">
-  <em>Generated comparison visualization for the implemented experiment framework.</em>
-</p>
 
 ### Terrain Visualization
 
@@ -198,6 +182,26 @@ Update 1 code from all four members has been merged.
     </td>
   </tr>
 </table>
+
+### Exploration Map
+
+<p align="center">
+  <img src="outputs/final_map.png" alt="Volcanic terrain exploration map" width="850">
+</p>
+
+<p align="center">
+  <em>Update 1 test visualization of the volcanic terrain. The dashed route is labeled in the image as a sample path for layout testing, not a final autonomous-agent result.</em>
+</p>
+
+### Performance Comparison
+
+<p align="center">
+  <img src="outputs/performance_plot.png" alt="Agent performance comparison" width="850">
+</p>
+
+<p align="center">
+  <em>Generated comparison visualization for the implemented experiment framework.</em>
+</p>
 
 ## Requirements
 
@@ -286,3 +290,4 @@ Generated output files currently include:
 The following output is still planned for later:
 
 - `demo_video.mp4`
+
