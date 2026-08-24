@@ -163,6 +163,47 @@ def render_mission_map(
     return resolved_path
 
 
+def render_policy_map(
+    terrain: Terrain,
+    policy: dict[tuple[int, int], str],
+    output_path: str = "outputs/policy_map.png",
+    title: str = "Value-Iteration Policy\n(best action in every walkable cell)",
+) -> Path:
+    """Render the extracted policy as arrows over the terrain and save it."""
+    from support.mdp import ACTION_DELTAS, SCAN, STAY
+
+    figure, axis = plt.subplots(figsize=(8, 8))
+    draw_terrain(terrain, axis)
+
+    for (row, col), action in policy.items():
+        x, y = col + 0.5, terrain.rows - 1 - row + 0.5
+
+        if action in ACTION_DELTAS:
+            drow, dcol = ACTION_DELTAS[action]
+            axis.annotate(
+                "",
+                xy=(x + dcol * 0.32, y - drow * 0.32),
+                xytext=(x - dcol * 0.32, y + drow * 0.32),
+                arrowprops={"arrowstyle": "-|>", "color": "black", "linewidth": 1.2},
+                zorder=5,
+            )
+        elif action == STAY:
+            axis.plot(x, y, marker="o", markersize=4, color="black", zorder=5)
+        elif action == SCAN:
+            axis.text(x, y, "?", ha="center", va="center", fontsize=9, color="black", zorder=5)
+
+    axis.set_title(title)
+    axis.legend(handles=build_legend_handles(), loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0)
+    figure.tight_layout()
+
+    resolved_path = _resolve_output_path(output_path)
+    resolved_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(resolved_path, dpi=120, bbox_inches="tight")
+    plt.close(figure)
+
+    return resolved_path
+
+
 def make_sample_path(terrain: Terrain, max_length: int = 15) -> list[tuple[int, int]]:
     """Build a short sample path of reachable cells starting at BASE, for layout testing only."""
     path = [terrain.base_location]

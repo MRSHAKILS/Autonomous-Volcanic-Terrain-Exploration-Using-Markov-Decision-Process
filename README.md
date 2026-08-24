@@ -107,8 +107,10 @@ volcanic-mdp-explorer/
 |-- images/
 |   |-- poster.png
 |   |-- final_map.png
+|   |-- policy_map.png
 |   |-- performance_plot.png
-|   |-- demo_video.mp4
+|   |-- hazards_before.png
+|   |-- hazards_after.png
 |   |-- demo_video.gif
 |   |-- terrain_map_seed_1.png
 |   |-- terrain_map_seed_7.png
@@ -124,18 +126,24 @@ volcanic-mdp-explorer/
 |   |-- simulation.py
 |   |-- visualization.py
 |   |-- demo_video.py
+|   |-- make_slides.py
 |   `-- experiments.py
 |-- outputs/                  (generated locally, gitignored)
 |   |-- .gitkeep
 |   |-- experiment_results.csv
 |   |-- final_map.png
+|   |-- policy_map.png
 |   |-- performance_plot.png
 |   `-- demo_video.mp4
 `-- others/
     |-- .gitkeep
     |-- final_report.tex
-    |-- final_report.pdf
-    `-- presentation_slides.md
+    |-- final_report.pdf        (8-page IEEE double-column final report)
+    |-- final_presentation.pptx
+    |-- update_report.tex
+    |-- update_report.pdf       (2-page IEEE double-column update report)
+    |-- update_presentation.pptx
+    `-- demo_video.mp4          (one-minute project demo run)
 ```
 
 ## Progress
@@ -218,14 +226,24 @@ Update 1 code from all four members was merged, and the final update completes t
   <em>Actual simulation result (seed 42, dynamic hazards on): the solid route is the real path taken by the MDP explorer agent (start ★ at BASE, end ■), and gold stars mark the cells where science samples were collected.</em>
 </p>
 
-### Mission Demo Video
+### Policy Visualization
 
 <p align="center">
-  <img src="images/demo_video.gif" alt="Animated mission demo with dynamic hazards" width="700">
+  <img src="images/policy_map.png" alt="Value-iteration policy drawn on the terrain" width="600">
 </p>
 
 <p align="center">
-  <em>A 60-second tour of the whole project, made for a voice-over: the problem, the MDP formulation with the computed policy drawn on the map, a live mission under dynamic hazards, and the baseline comparison results. An MP4 copy is at <a href="images/demo_video.mp4">images/demo_video.mp4</a>.</em>
+  <em>The value-iteration policy: one optimal action per walkable cell. The flow field bends around lava and craters while converging on science points and the base.</em>
+</p>
+
+### One-Minute Demo Video
+
+<p align="center">
+  <img src="images/demo_video.gif" alt="One-minute demo run of the project" width="700">
+</p>
+
+<p align="center">
+  <em>The one-minute project demo run, screen-capture style: the full pipeline executes in a terminal (terrain generation, value iteration, the mission), the generated mission map opens, then the baseline comparison runs and its performance plot opens. The submitted MP4 is at <a href="others/demo_video.mp4">others/demo_video.mp4</a>.</em>
 </p>
 
 ### Performance Comparison
@@ -251,8 +269,9 @@ The dependency list includes:
 - `numpy`
 - `matplotlib`
 - `pandas`
+- `python-pptx` (only for regenerating the presentation files)
 
-Generating `outputs/demo_video.mp4` also uses the `ffmpeg` command-line tool if it is installed; without it, the demo script saves a GIF instead.
+Generating `outputs/demo_video.mp4` also uses the `ffmpeg` command-line tool if it is installed; without it, the demo script saves a GIF instead. The LaTeX reports in `others/` compile with any modern TeX engine (e.g., `tectonic others/final_report.tex`).
 
 ## How to Run
 
@@ -279,8 +298,9 @@ python support/agent.py              # short agent rollout
 python support/simulation.py         # simulation loop, static and dynamic runs
 python support/hazards.py            # watch the terrain evolve for 20 steps
 python support/visualization.py      # render the mission map with the real path
-python support/demo_video.py         # generate outputs/demo_video.mp4
+python support/demo_video.py         # generate the one-minute demo-run video
 python support/experiments.py        # MDP vs Random vs Greedy comparison
+python support/make_slides.py        # regenerate the presentation PPTX files
 ```
 
 ## Known Limitations and Future Work
@@ -306,6 +326,7 @@ Running the commands above regenerates every artifact locally in `outputs/` (git
 - `outputs/experiment_results.csv`
 - `outputs/performance_plot.png`
 - `outputs/final_map.png`
+- `outputs/policy_map.png`
 - `outputs/demo_video.mp4`
 
-Committed copies of the final visuals live in `images/`, and the final report and presentation slides live in `others/`.
+Committed copies of the final visuals live in `images/`. The course deliverables live in `others/`: the 8-page IEEE-format final report (PDF + LaTeX source), the final presentation PPTX, the 2-page update report (PDF + LaTeX source), the update presentation PPTX, and the one-minute demo video.
