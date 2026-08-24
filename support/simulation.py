@@ -51,8 +51,13 @@ class Simulation:
 
         return len(self.agent.visited) / total_reachable * 100
 
-    def run(self) -> dict:
-        """Run the agent until max steps, death, coverage, or a long hold at one cell."""
+    def run(self, on_step=None) -> dict:
+        """Run the agent until max steps, death, coverage, or a long hold at one cell.
+
+        Args:
+            on_step: Optional callback invoked with this simulation after each
+                completed step, e.g. to record frames for a demo video.
+        """
         previous_position = self.agent.position
         same_cell_streak = 0
 
@@ -68,6 +73,9 @@ class Simulation:
                 self.agent.check_current_cell()
                 if self.agent.alive:
                     self.agent.replan()
+
+            if on_step is not None:
+                on_step(self)
 
             if self.calculate_coverage() >= self.coverage_target * 100:
                 break
