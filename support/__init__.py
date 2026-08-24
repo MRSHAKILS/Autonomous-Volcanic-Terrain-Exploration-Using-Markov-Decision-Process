@@ -1,7 +1,14 @@
 """Support package for the volcanic MDP explorer project.
 
-The package currently contains Week 1 planning modules and small setup helpers.
+The package contains the full pipeline: terrain generation, the MDP core,
+the explorer agent, dynamic hazards, the simulation loop, visualization,
+demo-video generation, and the baseline experiments.
 """
 
-# TODO: Export shared project classes here after the terrain, MDP, and agent
-# modules are implemented in later weeks.
+from support.agent import MDPExplorerAgent
+from support.hazards import DynamicHazards
+from support.mdp import VolcanicMDP
+from support.simulation import Simulation
+from support.terrain import Terrain
+
+__all__ = ["DynamicHazards", "MDPExplorerAgent", "Simulation", "Terrain", "VolcanicMDP"]

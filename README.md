@@ -245,12 +245,13 @@ Install the project dependencies with:
 pip install -r requirements.txt
 ```
 
-The dependency list currently includes:
+The dependency list includes:
 
 - `numpy`
 - `matplotlib`
 - `pandas`
-- `tqdm`
+
+Generating `outputs/demo_video.mp4` also uses the `ffmpeg` command-line tool if it is installed; without it, the demo script saves a GIF instead.
 
 ## How to Run
 
