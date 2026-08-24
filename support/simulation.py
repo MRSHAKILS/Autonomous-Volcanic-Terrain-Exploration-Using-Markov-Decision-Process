@@ -23,12 +23,14 @@ class Simulation:
         max_steps: int = 100,
         coverage_target: float = 0.60,
         seed: int = 42,
+        stuck_limit: int = 8,
     ) -> None:
         """Build the MDP, compute a policy, and create the agent ready to run."""
         self.terrain = terrain
         self.max_steps = max_steps
         self.coverage_target = coverage_target
         self.seed = seed
+        self.stuck_limit = stuck_limit
 
         self.mdp = VolcanicMDP(terrain)
         self.mdp.value_iteration()
@@ -47,7 +49,10 @@ class Simulation:
         return len(self.agent.visited) / total_reachable * 100
 
     def run(self) -> dict:
-        """Run the agent until max steps, death, or the coverage target is reached."""
+        """Run the agent until max steps, death, coverage, or a long hold at one cell."""
+        previous_position = self.agent.position
+        same_cell_streak = 0
+
         for _ in range(self.max_steps):
             if not self.agent.alive:
                 break
@@ -55,6 +60,14 @@ class Simulation:
             self.agent.step()
 
             if self.calculate_coverage() >= self.coverage_target * 100:
+                break
+
+            # The optimal policy eventually parks the agent (usually at BASE)
+            # once every objective is collected; stop the mission at that point.
+            same_cell_streak = same_cell_streak + 1 if self.agent.position == previous_position else 0
+            previous_position = self.agent.position
+
+            if same_cell_streak >= self.stuck_limit:
                 break
 
         self.summary = self._build_summary()

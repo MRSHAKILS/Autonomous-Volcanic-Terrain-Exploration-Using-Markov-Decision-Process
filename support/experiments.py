@@ -14,12 +14,12 @@ Three agents are compared on the same maps under the same uncertain movement:
 3. Greedy agent - walks toward the nearest unvisited cell (nearest-unvisited),
                   avoiding only rock and lava while planning.
 
-Exploration rule (applied to every agent by this harness): a science sample can
-only be collected once. When an agent first reaches a science cell it becomes
-ordinary ground, and the MDP agent re-runs value iteration so it heads to the
-next objective instead of camping on one high-value cell. This rule lives here,
-in the experiment harness; ``terrain.py``, ``mdp.py``, ``agent.py``, and
-``simulation.py`` are all used unchanged through their public methods.
+Exploration rule (applied to every agent): a science sample can only be
+collected once. When an agent first reaches a science cell it becomes ordinary
+ground, and the MDP agent re-runs value iteration so it heads to the next
+objective instead of camping on one high-value cell. This rule lives in
+``MDPExplorerAgent`` itself (``support/agent.py``), so the baselines inherit
+it automatically and every agent is measured under the same environment.
 
 Run it with::
 
@@ -50,7 +50,7 @@ import pandas as pd
 from support.agent import MDPExplorerAgent
 from support.config import load_config
 from support.mdp import ACTION_DELTAS, MOVEMENT_ACTIONS, STAY, VolcanicMDP
-from support.terrain import LAVA, ROCK, SAFE, SCIENCE, Terrain
+from support.terrain import LAVA, ROCK, Terrain
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -204,7 +204,6 @@ def _run_episode(seed: int, agent_type: str) -> dict:
     rng = random.Random(seed)  # deterministic movement sampling per run
     agent = _make_agent(agent_type, terrain, mdp, policy, rng)
 
-    collected_science = set()
     previous_position = agent.position
     same_cell_streak = 0
 
@@ -212,18 +211,10 @@ def _run_episode(seed: int, agent_type: str) -> dict:
         if not agent.alive:
             break
 
+        # The collect-once science rule (and the MDP agent's re-plan after
+        # each sample) is applied inside MDPExplorerAgent.step().
         agent.step()
         position = agent.position
-
-        # Collect-once: a science sample can be gathered a single time. The
-        # cell then becomes ordinary ground, and the MDP agent re-plans so it
-        # moves on to the next objective instead of camping on one cell.
-        if terrain.get_cell(*position) == SCIENCE and position not in collected_science:
-            collected_science.add(position)
-            terrain.set_cell(position[0], position[1], SAFE)
-            if agent_type == AGENT_MDP:
-                mdp.value_iteration()
-                agent.policy = mdp.extract_policy()
 
         same_cell_streak = same_cell_streak + 1 if position == previous_position else 0
         previous_position = position
