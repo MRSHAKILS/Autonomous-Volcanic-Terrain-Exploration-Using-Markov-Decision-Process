@@ -1,33 +1,56 @@
-"""Week 2 terrain generation demo for the volcanic MDP explorer project."""
+"""End-to-end demo for the volcanic MDP explorer project.
+
+Runs the full pipeline: terrain generation, MDP value iteration and policy
+extraction, the explorer-agent simulation (optionally with dynamic hazards),
+and the final mission-map visualization.
+"""
 
 import argparse
 from pathlib import Path
 
+from support.simulation import Simulation
 from support.terrain import BASE, CRATER, GAS, LAVA, ROCK, SAFE, SCIENCE, SYMBOLS, Terrain
 from support.utils import print_section_header
+from support.visualization import render_mission_map
 
 
 PROJECT_TITLE = "Autonomous Volcanic Terrain Exploration Using Markov Decision Process (MDP)"
 PROJECT_ROOT = Path(__file__).resolve().parent
-DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "data" / "sample_terrain_seed_42.csv"
+DEFAULT_MAP_PATH = "outputs/final_map.png"
+
+
+def terrain_csv_path(seed: int) -> Path:
+    """Return the CSV path used to save the generated terrain for a seed."""
+    return PROJECT_ROOT / "data" / f"sample_terrain_seed_{seed}.csv"
 
 
 def parse_arguments() -> argparse.Namespace:
-    """Read optional command-line arguments for the terrain demo."""
+    """Read optional command-line arguments for the full pipeline demo."""
     parser = argparse.ArgumentParser(
-        description="Generate a volcanic terrain grid for the Week 2 project demo."
+        description="Run the full volcanic MDP exploration pipeline: terrain, MDP, agent, visualization."
     )
     parser.add_argument(
         "--seed",
         type=int,
         default=42,
-        help="Random seed used for reproducible terrain generation. Default: 42.",
+        help="Random seed used for reproducible terrain and simulation. Default: 42.",
     )
     parser.add_argument(
         "--size",
         type=int,
         default=None,
         help="Optional square grid size. Example: --size 20 creates a 20x20 grid.",
+    )
+    parser.add_argument(
+        "--steps",
+        type=int,
+        default=100,
+        help="Maximum number of simulation steps. Default: 100.",
+    )
+    parser.add_argument(
+        "--static",
+        action="store_true",
+        help="Disable dynamic hazards (gas drift and lava flows) during the simulation.",
     )
 
     return parser.parse_args()
@@ -64,33 +87,56 @@ def print_cell_counts(terrain: Terrain) -> None:
 
 
 def main() -> None:
-    """Run the Week 2 volcanic terrain generation demo."""
+    """Run the full exploration pipeline from terrain to mission map."""
     args = parse_arguments()
+    dynamic_hazards = not args.static
 
     print_section_header("Project Title")
     print(PROJECT_TITLE)
 
-    print_section_header("Week 2: Volcanic Terrain Generation")
+    print_section_header("Step 1: Volcanic Terrain Generation")
     terrain = create_terrain(seed=args.seed, size=args.size)
     print(f"Seed: {args.seed}")
     print(f"Grid size: {terrain.rows}x{terrain.cols}")
-
-    print_section_header("Generated Terrain Grid")
+    print()
     terrain.print_grid()
-
-    print_section_header("Terrain Cell Counts")
+    print()
     print_cell_counts(terrain)
 
-    terrain.save_to_csv(DEFAULT_OUTPUT_PATH)
-    print_section_header("Saved Terrain File")
-    print(f"Generated terrain saved to: {DEFAULT_OUTPUT_PATH}")
+    csv_path = terrain_csv_path(args.seed)
+    terrain.save_to_csv(csv_path)
+    print(f"Generated terrain saved to: {csv_path}")
+
+    print_section_header("Step 2: MDP Value Iteration and Policy")
+    simulation = Simulation(
+        terrain,
+        max_steps=args.steps,
+        coverage_target=0.60,
+        seed=args.seed,
+        dynamic_hazards=dynamic_hazards,
+    )
+    print(f"States: {len(simulation.mdp.get_states())}")
+    print(f"Gamma: {simulation.mdp.gamma}")
+    print()
+    print("Initial policy (before any re-planning):")
+    simulation.mdp.print_policy()
+
+    print_section_header("Step 3: Autonomous Agent Simulation")
+    print(f"Dynamic hazards: {'ON' if dynamic_hazards else 'OFF'}")
+    simulation.run()
+    simulation.print_summary()
+
+    print_section_header("Step 4: Mission Map Visualization")
+    map_path = render_mission_map(
+        terrain,
+        path=simulation.agent.path,
+        collected_science=simulation.agent.science_collected_positions,
+        output_path=DEFAULT_MAP_PATH,
+    )
+    print(f"Saved mission map: {map_path}")
 
     print_section_header("Symbol Legend")
     print_symbol_legend()
-
-    print_section_header("Week 3 Preview")
-    print("Next step: use this terrain grid as the environment for MDP state, reward, and transition design.")
-    print("MDP value iteration and agent movement are not implemented yet.")
 
 
 if __name__ == "__main__":
