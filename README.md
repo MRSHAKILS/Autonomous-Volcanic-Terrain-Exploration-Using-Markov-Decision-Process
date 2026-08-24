@@ -190,7 +190,7 @@ Update 1 code from all four members has been merged.
 </p>
 
 <p align="center">
-  <em>Update 1 test visualization of the volcanic terrain. The dashed route is labeled in the image as a sample path for layout testing, not a final autonomous-agent result.</em>
+  <em>Actual simulation result: the solid route is the real path taken by the MDP explorer agent (start ★ at BASE, end ■), and gold stars mark the cells where science samples were collected.</em>
 </p>
 
 ### Performance Comparison

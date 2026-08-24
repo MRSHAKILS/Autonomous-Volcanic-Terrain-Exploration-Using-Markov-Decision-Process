@@ -1,9 +1,10 @@
 """Terrain and path visualization for the volcanic explorer project.
 
 This module draws the volcanic terrain grid with matplotlib and saves it as
-an image. For Update 1, only the terrain itself is guaranteed to be real; any
-path drawn on top is a labeled sample path for layout testing only, since
-Member 2's finished simulation path is not wired in yet.
+an image. It can render either a plain terrain map, a terrain map with a
+labeled sample path (kept for layout testing), or a full mission map showing
+the real path the MDP explorer agent took during a simulation, including the
+science cells where samples were collected.
 """
 
 import sys
@@ -20,6 +21,7 @@ import matplotlib
 
 matplotlib.use("Agg")  # save figures without needing a display
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 from support.terrain import BASE, CRATER, GAS, LAVA, ROCK, SAFE, SCIENCE, Terrain
@@ -75,8 +77,12 @@ def draw_sample_path(path: list[tuple[int, int]], terrain: Terrain, axis: plt.Ax
     axis.plot(xs[0], ys[0], marker="*", markersize=16, color="black", zorder=6)
 
 
-def build_legend_handles(include_sample_path: bool) -> list[Patch]:
-    """Build legend patches for every terrain type (and the sample path if drawn)."""
+def build_legend_handles(
+    include_sample_path: bool = False,
+    include_agent_path: bool = False,
+    include_collected_science: bool = False,
+) -> list:
+    """Build legend entries for the terrain types and any drawn overlays."""
     handles = [Patch(facecolor=CELL_COLORS[cell_type], edgecolor="white", label=CELL_LABELS[cell_type]) for cell_type in CELL_LABELS]
 
     if include_sample_path:
@@ -84,7 +90,77 @@ def build_legend_handles(include_sample_path: bool) -> list[Patch]:
             Patch(facecolor="none", edgecolor="black", linestyle="--", label="Sample path (test only, not a final result)")
         )
 
+    if include_agent_path:
+        handles.append(
+            Line2D([], [], color="black", linewidth=2.0, marker="o", markersize=4, label="Agent path (start ★, end ■)")
+        )
+
+    if include_collected_science:
+        handles.append(
+            Line2D([], [], color="none", marker="*", markersize=12, markerfacecolor="#f2c744", markeredgecolor="black", label="Science sample collected")
+        )
+
     return handles
+
+
+def draw_agent_path(path: list[tuple[int, int]], terrain: Terrain, axis: plt.Axes) -> None:
+    """Draw the real path taken by the explorer agent during a simulation."""
+    xs = [col + 0.5 for _row, col in path]
+    ys = [terrain.rows - 1 - row + 0.5 for row, _col in path]
+
+    axis.plot(xs, ys, color="black", linewidth=2.0, marker="o", markersize=4, zorder=5)
+    axis.plot(xs[0], ys[0], marker="*", markersize=18, color="black", zorder=6)
+    axis.plot(xs[-1], ys[-1], marker="s", markersize=10, color="black", zorder=6)
+
+
+def draw_collected_science(positions: list[tuple[int, int]], terrain: Terrain, axis: plt.Axes) -> None:
+    """Mark the cells where the agent collected a science sample."""
+    for row, col in positions:
+        axis.plot(
+            col + 0.5,
+            terrain.rows - 1 - row + 0.5,
+            marker="*",
+            markersize=16,
+            markerfacecolor="#f2c744",
+            markeredgecolor="black",
+            zorder=7,
+        )
+
+
+def render_mission_map(
+    terrain: Terrain,
+    path: list[tuple[int, int]],
+    collected_science: list[tuple[int, int]] | None = None,
+    output_path: str = DEFAULT_OUTPUT_PATH,
+    title: str = "Volcanic Terrain Exploration\n(actual MDP agent path)",
+) -> Path:
+    """Render the terrain with the agent's real simulation path and save it."""
+    figure, axis = plt.subplots(figsize=(8, 8))
+
+    draw_terrain(terrain, axis)
+    draw_agent_path(path, terrain, axis)
+
+    if collected_science:
+        draw_collected_science(collected_science, terrain, axis)
+
+    axis.set_title(title)
+    axis.legend(
+        handles=build_legend_handles(
+            include_agent_path=True,
+            include_collected_science=bool(collected_science),
+        ),
+        loc="upper left",
+        bbox_to_anchor=(1.02, 1.0),
+        borderaxespad=0,
+    )
+    figure.tight_layout()
+
+    resolved_path = _resolve_output_path(output_path)
+    resolved_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(resolved_path, dpi=120, bbox_inches="tight")
+    plt.close(figure)
+
+    return resolved_path
 
 
 def make_sample_path(terrain: Terrain, max_length: int = 15) -> list[tuple[int, int]]:
@@ -138,16 +214,26 @@ def _resolve_output_path(path: str) -> Path:
 
 
 def main() -> None:
-    """Generate the Update 1 terrain map with a clearly labeled sample path."""
+    """Run a real simulation and render the mission map with the agent's path."""
+    from support.simulation import Simulation
+
     terrain = Terrain(seed=42)
     terrain.generate()
 
-    sample_path = make_sample_path(terrain)
-    output_path = render_terrain_map(terrain, path=sample_path)
+    simulation = Simulation(terrain, max_steps=100, coverage_target=0.60, seed=42)
+    summary = simulation.run()
+
+    output_path = render_mission_map(
+        terrain,
+        path=simulation.agent.path,
+        collected_science=simulation.agent.science_collected_positions,
+    )
 
     print(f"Terrain size: {terrain.rows}x{terrain.cols}")
-    print(f"Sample path length (test only): {len(sample_path)}")
-    print(f"Saved terrain map: {output_path}")
+    print(f"Agent path length: {len(simulation.agent.path)}")
+    print(f"Science samples collected: {summary['science_points_collected']}")
+    print(f"Survived: {summary['survived']}")
+    print(f"Saved mission map: {output_path}")
 
 
 if __name__ == "__main__":
