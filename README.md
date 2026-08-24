@@ -78,7 +78,7 @@ A science sample can only be collected once. When the agent first reaches a scie
 
 ### Dynamic Hazards
 
-The environment changes while the agent explores (`support/hazards.py`): gas clouds can drift into a neighboring safe cell, and lava can spill into a neighboring safe cell and cool back to safe ground after a few steps. Only safe cells are ever converted, so the base, science points, rock, and craters are never destroyed and the MDP state space stays fixed. Whenever the terrain changes, the agent re-plans with a fresh round of value iteration — and a lava flow that reaches the agent's cell destroys it.
+The environment changes while the agent explores (`support/hazards.py`): gas clouds can drift into a neighboring safe cell, and lava can spill into a neighboring safe cell and cool back to safe ground after a few steps. Only safe cells are ever converted, so the base, science points, rock, and craters are never destroyed and the MDP state space stays fixed. Whenever the terrain changes, the agent re-plans with a fresh round of value iteration, and a lava flow that reaches the agent's cell destroys it.
 
 ## Terrain Symbols
 
@@ -197,7 +197,7 @@ Update 1 code from all four members was merged, and the final update completes t
 
 ### Terrain Visualization
 
-`support/visualization.py` renders the terrain grid with matplotlib, using a distinct color for each of the seven cell types—Safe, Lava, Crater, Gas, Rock, Science, and Base—together with a title and legend. The following examples were generated using different random seeds.
+`support/visualization.py` renders the terrain grid with matplotlib, using a distinct color for each of the seven cell types (Safe, Lava, Crater, Gas, Rock, Science, and Base), together with a title and legend. The following examples were generated using different random seeds.
 
 <table>
   <tr>

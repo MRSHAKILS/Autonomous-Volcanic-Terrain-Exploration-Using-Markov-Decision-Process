@@ -233,7 +233,7 @@ def render_terrain_map(
 
     if path:
         draw_sample_path(path, terrain, axis)
-        axis.set_title("Volcanic Terrain Map\n(with labeled SAMPLE PATH — test layout only, not a final result)")
+        axis.set_title("Volcanic Terrain Map\n(with labeled SAMPLE PATH: test layout only, not a final result)")
     else:
         axis.set_title("Volcanic Terrain Map")
 

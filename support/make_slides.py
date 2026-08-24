@@ -39,7 +39,7 @@ ACCENT = RGBColor(0xC0, 0x39, 0x2B)
 
 GROUP = "Group 5"
 MEMBERS = "Shakil Ahmed  ·  Fahim Foysal  ·  Shefa Tabassum  ·  Tanvir Ahmed"
-FOOTER_TEXT = f"{GROUP}  —  {MEMBERS}"
+FOOTER_TEXT = f"{GROUP}  |  {MEMBERS}"
 
 
 def _new_deck() -> Presentation:
@@ -118,7 +118,7 @@ def _title_slide(deck, subtitle_lines):
             ("", 12, False, GRAY),
             ("We are Group 5:", 18, True, WHITE),
             ("Shakil Ahmed   ·   Fahim Foysal   ·   Shefa Tabassum   ·   Tanvir Ahmed", 18, False, GRAY),
-            ("CSE 440 — Artificial Intelligence  ·  Section 1  ·  Instructor: Dr. Mohammad Shifat-E-Rabbi", 13, False, GRAY),
+            ("CSE 440 (Artificial Intelligence)  ·  Section 1  ·  Instructor: Dr. Mohammad Shifat-E-Rabbi", 13, False, GRAY),
         ],
         dark=True,
     )
@@ -141,7 +141,7 @@ def build_final_deck() -> Path:
         "Volcanic terrain is too dangerous for humans to explore directly",
         "An autonomous rover must collect science samples and survive",
         "Lava is fatal; craters and gas are costly; rock blocks movement",
-        "Movement is unreliable — the rover can slip sideways or stall",
+        "Movement is unreliable: the rover can slip sideways or stall",
         "The terrain itself changes during the mission",
     ])
     _picture(slide, "hazards_before.png", Inches(7.5), Inches(1.3), Inches(5.3))
@@ -153,7 +153,7 @@ def build_final_deck() -> Path:
         "Actions: up / down / left / right / stay / scan",
         "Transitions: 75% intended, 10% drift each side, 5% stall",
         "Rewards: science +20, base +5, safe −1, gas −15, crater −40, lava −100",
-        "Discount γ = 0.9 — tuned so distant science never justifies deadly gambles",
+        "Discount γ = 0.9, tuned so distant science never justifies deadly gambles",
         "Solved exactly with value iteration (converges in milliseconds)",
     ])
     _add_text(slide, Inches(7.6), Inches(2.2), Inches(5.2), Inches(2.5), [
@@ -164,7 +164,7 @@ def build_final_deck() -> Path:
     slide = _blank_slide(deck)
     _title_line(slide, "The computed policy")
     _bullets(slide, [
-        "One optimal action per cell — a complete plan, not a single path",
+        "One optimal action per cell: a complete plan, not a single path",
         "The flow field bends around lava and craters",
         "It converges on science points and the base",
         "Robust by construction: slips land the agent on cells that already have a plan",
@@ -175,7 +175,7 @@ def build_final_deck() -> Path:
     _title_line(slide, "Collect-once science + re-planning")
     _bullets(slide, [
         "Naive MDP behavior: camp forever on one +20 science cell",
-        "Our rule: a sample is collected once — the cell becomes ordinary ground",
+        "Our rule: a sample is collected once, then the cell becomes ordinary ground",
         "The agent immediately re-runs value iteration (warm start: a few sweeps)",
         "Result: an efficient, risk-adjusted tour of the objectives, then return to base",
     ])
@@ -185,7 +185,7 @@ def build_final_deck() -> Path:
     _bullets(slide, [
         "Gas clouds drift into neighboring safe cells (p = 0.15 per cloud per step)",
         "Lava spills into safe neighbors (p = 0.08) and cools back after 6 steps",
-        "Base, science, rock, and craters are never destroyed — state space stays fixed",
+        "Base, science, rock, and craters are never destroyed, so the state space stays fixed",
         "Every terrain change triggers a fresh re-plan",
         "A lava flow reaching the rover destroys it",
     ], width=Inches(6.0))
@@ -201,7 +201,7 @@ def build_final_deck() -> Path:
         "Seed 42, dynamic hazards ON",
         "24 steps, 2 science samples, survived",
         "71 terrain-change events during the mission",
-        "Reward higher than the static run of the same seed — re-planning exploited a gas cloud drifting off its route",
+        "Reward higher than the static run of the same seed: re-planning exploited a gas cloud drifting off its route",
     ], width=Inches(5.6))
     _picture(slide, "final_map.png", Inches(6.6), Inches(1.1), Inches(6.3))
 
@@ -209,10 +209,10 @@ def build_final_deck() -> Path:
     _title_line(slide, "Does planning beat heuristics? 20 random terrains")
     _bullets(slide, [
         "MDP: follows the value-iteration policy",
-        "Greedy: BFS to nearest unvisited cell — ignores soft hazards",
+        "Greedy: BFS to nearest unvisited cell, ignoring soft hazards",
         "Random: uniform random direction",
         "Only the MDP agent earns positive reward: +42 vs −124 vs −180",
-        "It survives 60% of missions — 2× greedy — with ~5× fewer hazard entries",
+        "It survives 60% of missions (2× greedy) with ~5× fewer hazard entries",
     ], width=Inches(5.5), size=16)
     _picture(slide, "performance_plot.png", Inches(6.4), Inches(1.1), Inches(6.5))
 
@@ -220,7 +220,7 @@ def build_final_deck() -> Path:
     _title_line(slide, "Conclusions & future work")
     _bullets(slide, [
         "Decision-theoretic planning decisively beats heuristics in hazardous exploration",
-        "Safety and science behavior emerge from the reward model — no hand-coded rules",
+        "Safety and science behavior emerge from the reward model, with no hand-coded rules",
         "The reward model IS the specification: 'camping' was optimal until we changed the rules",
         "Future: risk-sensitive objectives, energy budgets, fog-of-war POMDP, multi-rover teams",
         "Everything is seeded and reproducible: python main.py",
@@ -239,15 +239,15 @@ def build_final_deck() -> Path:
 def build_update_deck() -> Path:
     deck = _new_deck()
 
-    _title_slide(deck, [("Project Update — Update 1", 18, False, WHITE)])
+    _title_slide(deck, [("Project Update 1", 18, False, WHITE)])
 
     slide = _blank_slide(deck)
     _title_line(slide, "Problem & goal")
     _bullets(slide, [
         "An autonomous rover exploring hazardous volcanic terrain",
         "Grid world: safe ground, lava, craters, gas, rock, science points, base",
-        "Movement is stochastic — the rover can slip or stall",
-        "Goal: collect science, avoid hazards, survive — planned with an MDP",
+        "Movement is stochastic: the rover can slip or stall",
+        "Goal: collect science, avoid hazards, and survive, planned with an MDP",
     ])
     _picture(slide, "terrain_map_seed_1.png", Inches(7.6), Inches(1.5), Inches(5.2))
 
@@ -267,7 +267,7 @@ def build_update_deck() -> Path:
         "MDPExplorerAgent: starts at base, follows the policy, samples real outcomes",
         "Tracks reward, hazards, science, survival; mission summary",
         "Simulation loop with step budget and coverage target",
-        "Matplotlib terrain rendering with legend — one color per cell type",
+        "Matplotlib terrain rendering with legend, one color per cell type",
     ])
 
     slide = _blank_slide(deck)

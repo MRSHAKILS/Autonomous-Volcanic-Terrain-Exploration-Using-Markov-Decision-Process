@@ -25,7 +25,7 @@
 
 \author{
   \IEEEauthorblockN{Shakil Ahmed, Fahim Foysal, Shefa Tabassum, and Tanvir Ahmed}
-  \IEEEauthorblockA{Group 5, CSE 440 --- Artificial Intelligence, Section 1\\
+  \IEEEauthorblockA{Group 5, CSE 440, Artificial Intelligence, Section 1\\
   North South University \quad$\cdot$\quad Instructor: Dr.\ Mohammad Shifat-E-Rabbi}
 }
 
@@ -48,13 +48,13 @@ States are walkable grid cells; actions are the four movement directions plus \t
 
 \section{Progress by Member}
 
-\subsubsection{Member 1 --- terrain and MDP core} Repository structure and configuration system; a seeded procedural terrain generator over seven cell types with hazard density capped at $0.30$ and CSV save/load; the full MDP formulation; value iteration and optimal policy extraction.
+\subsubsection{Member 1: terrain and MDP core} Repository structure and configuration system; a seeded procedural terrain generator over seven cell types with hazard density capped at $0.30$ and CSV save/load; the full MDP formulation; value iteration and optimal policy extraction.
 
-\subsubsection{Member 2 --- agent and simulation} An \texttt{MDPExplorerAgent} that starts at the base station, queries the policy, and samples real outcomes from the transition model; tracking of reward, hazards entered, science collected, and survival; a simulation loop with a step budget and coverage target and a mission summary.
+\subsubsection{Member 2: agent and simulation} An \texttt{MDPExplorerAgent} that starts at the base station, queries the policy, and samples real outcomes from the transition model; tracking of reward, hazards entered, science collected, and survival; a simulation loop with a step budget and coverage target and a mission summary.
 
-\subsubsection{Member 3 --- visualization} Matplotlib rendering of the terrain grid with a distinct color per cell type, title, and legend (Fig.~\ref{fig:terrain}); example maps generated across several seeds; a layout-test exploration map (clearly labeled as a sample path, to be replaced by the real agent path).
+\subsubsection{Member 3: visualization} Matplotlib rendering of the terrain grid with a distinct color per cell type, title, and legend (Fig.~\ref{fig:terrain}); example maps generated across several seeds; a layout-test exploration map (clearly labeled as a sample path, to be replaced by the real agent path).
 
-\subsubsection{Member 4 --- experiments} A comparison harness running three agents on identical terrains: the MDP agent, a greedy nearest-unvisited baseline, and a random-walk baseline; shared metrics (reward, coverage, hazards, science, survival, steps); automatic CSV and performance-plot generation (Fig.~\ref{fig:performance}).
+\subsubsection{Member 4: experiments} A comparison harness running three agents on identical terrains: the MDP agent, a greedy nearest-unvisited baseline, and a random-walk baseline; shared metrics (reward, coverage, hazards, science, survival, steps); automatic CSV and performance-plot generation (Fig.~\ref{fig:performance}).
 
 \begin{figure}[t]
   \centering
