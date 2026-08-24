@@ -127,6 +127,7 @@ volcanic-mdp-explorer/
 |   |-- visualization.py
 |   |-- demo_video.py
 |   |-- make_slides.py
+|   |-- pptx_to_doc.py
 |   `-- experiments.py
 |-- outputs/                  (generated locally, gitignored)
 |   |-- .gitkeep
@@ -140,9 +141,11 @@ volcanic-mdp-explorer/
     |-- final_report.tex
     |-- final_report.pdf        (8-page IEEE double-column final report)
     |-- final_presentation.pptx
+    |-- final_presentation.docx (Word version of the final deck)
     |-- update_report.tex
     |-- update_report.pdf       (2-page IEEE double-column update report)
     |-- update_presentation.pptx
+    |-- update_presentation.docx (Word version of the update deck)
     `-- demo_video.mp4          (one-minute project demo run)
 ```
 
@@ -270,6 +273,7 @@ The dependency list includes:
 - `matplotlib`
 - `pandas`
 - `python-pptx` (only for regenerating the presentation files)
+- `python-docx` (only for converting the presentations to Word)
 
 Generating `outputs/demo_video.mp4` also uses the `ffmpeg` command-line tool if it is installed; without it, the demo script saves a GIF instead. The LaTeX reports in `others/` compile with any modern TeX engine (e.g., `tectonic others/final_report.tex`).
 
@@ -301,6 +305,7 @@ python support/visualization.py      # render the mission map with the real path
 python support/demo_video.py         # generate the one-minute demo-run video
 python support/experiments.py        # MDP vs Random vs Greedy comparison
 python support/make_slides.py        # regenerate the presentation PPTX files
+python support/pptx_to_doc.py        # convert the PPTX decks to Word (.docx)
 ```
 
 ## Known Limitations and Future Work
