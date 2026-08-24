@@ -133,7 +133,8 @@ volcanic-mdp-explorer/
 |   `-- demo_video.mp4
 `-- others/
     |-- .gitkeep
-    |-- final_report.md
+    |-- final_report.tex
+    |-- final_report.pdf
     `-- presentation_slides.md
 ```
 
@@ -224,7 +225,7 @@ Update 1 code from all four members was merged, and the final update completes t
 </p>
 
 <p align="center">
-  <em>A full mission under dynamic hazards: the terrain changes (gas drifts, lava spreads and cools) while the agent explores, collects samples, and re-plans. An MP4 copy is at <a href="images/demo_video.mp4">images/demo_video.mp4</a>.</em>
+  <em>A 60-second tour of the whole project, made for a voice-over: the problem, the MDP formulation with the computed policy drawn on the map, a live mission under dynamic hazards, and the baseline comparison results. An MP4 copy is at <a href="images/demo_video.mp4">images/demo_video.mp4</a>.</em>
 </p>
 
 ### Performance Comparison
