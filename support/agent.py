@@ -96,6 +96,19 @@ class MDPExplorerAgent:
         self.terrain.set_cell(position[0], position[1], SAFE)
         self.replan()
 
+    def check_current_cell(self) -> None:
+        """Re-check the cell under the agent after the environment changed.
+
+        Dynamic hazards can move onto the agent between its own steps; being
+        caught by a lava flow is fatal.
+        """
+        if not self.alive:
+            return
+
+        if self.terrain.get_cell(*self.position) == LAVA:
+            self.hazards_entered += 1
+            self.alive = False
+
     def replan(self) -> None:
         """Re-run value iteration on the current terrain and refresh the policy.
 

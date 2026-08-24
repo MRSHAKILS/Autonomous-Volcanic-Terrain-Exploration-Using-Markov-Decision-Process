@@ -290,8 +290,8 @@ class Terrain:
             print(" ".join(symbols))
 
 
-# TODO: In a later update, allow hazards to change during simulation if dynamic
-# terrain behavior is needed.
+# Dynamic terrain behavior (drifting gas, spreading lava) is implemented in
+# support/hazards.py on top of this class's public get_cell/set_cell interface.
 
 
 if __name__ == "__main__":
