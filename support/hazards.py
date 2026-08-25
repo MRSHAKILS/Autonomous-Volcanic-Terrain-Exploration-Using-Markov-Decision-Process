@@ -24,6 +24,7 @@ from pathlib import Path
 if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
+from support.config import get_dynamic_hazard_parameters
 from support.terrain import GAS, LAVA, SAFE, Terrain
 
 
@@ -34,20 +35,55 @@ class DynamicHazards:
         self,
         terrain: Terrain,
         seed: int | None = None,
-        gas_drift_probability: float = 0.15,
-        lava_spread_probability: float = 0.08,
-        lava_cooldown_steps: int = 6,
+        gas_drift_probability: float | None = None,
+        lava_spread_probability: float | None = None,
+        lava_cooldown_steps: int | None = None,
     ) -> None:
-        """Attach dynamic hazard behavior to an already generated terrain."""
+        """Attach dynamic hazards using explicit values or project config."""
+        parameters = get_dynamic_hazard_parameters()
+
         self.terrain = terrain
         self.rng = random.Random(seed)
-        self.gas_drift_probability = gas_drift_probability
-        self.lava_spread_probability = lava_spread_probability
-        self.lava_cooldown_steps = lava_cooldown_steps
+        self.gas_drift_probability = (
+            parameters["gas_drift_probability"]
+            if gas_drift_probability is None
+            else gas_drift_probability
+        )
+        self.lava_spread_probability = (
+            parameters["lava_spread_probability"]
+            if lava_spread_probability is None
+            else lava_spread_probability
+        )
+        self.lava_cooldown_steps = (
+            parameters["lava_cooldown_steps"]
+            if lava_cooldown_steps is None
+            else lava_cooldown_steps
+        )
+        self._validate_parameters()
 
         # New lava flows cool back to safe ground; original lava is permanent.
         self.active_lava_flows: dict[tuple[int, int], int] = {}
         self.total_events = 0
+
+    def _validate_parameters(self) -> None:
+        """Validate explicit constructor values as clearly as config values."""
+        probabilities = {
+            "gas_drift_probability": self.gas_drift_probability,
+            "lava_spread_probability": self.lava_spread_probability,
+        }
+
+        for name, value in probabilities.items():
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(f"{name} must be a number.")
+            if value < 0 or value > 1:
+                raise ValueError(f"{name} must be between 0 and 1.")
+
+        if (
+            isinstance(self.lava_cooldown_steps, bool)
+            or not isinstance(self.lava_cooldown_steps, int)
+            or self.lava_cooldown_steps <= 0
+        ):
+            raise ValueError("lava_cooldown_steps must be a positive integer.")
 
     def step(self) -> bool:
         """Advance the hazards by one time step.

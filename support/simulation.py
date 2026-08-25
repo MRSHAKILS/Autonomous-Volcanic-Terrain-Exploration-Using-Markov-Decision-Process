@@ -41,6 +41,7 @@ class Simulation:
         self.agent = MDPExplorerAgent(terrain, self.mdp, self.policy, rng=random.Random(seed))
         self.hazards = DynamicHazards(terrain, seed=seed) if dynamic_hazards else None
         self.summary = None
+        self.stopping_reason = None
 
     def calculate_coverage(self) -> float:
         """Return the percentage of reachable (non-rock) cells visited so far."""
@@ -60,9 +61,11 @@ class Simulation:
         """
         previous_position = self.agent.position
         same_cell_streak = 0
+        self.stopping_reason = "max_steps_reached"
 
         for _ in range(self.max_steps):
             if not self.agent.alive:
+                self.stopping_reason = "agent_died"
                 break
 
             self.agent.step()
@@ -77,7 +80,12 @@ class Simulation:
             if on_step is not None:
                 on_step(self)
 
+            if not self.agent.alive:
+                self.stopping_reason = "agent_died"
+                break
+
             if self.calculate_coverage() >= self.coverage_target * 100:
+                self.stopping_reason = "coverage_target_reached"
                 break
 
             # The optimal policy eventually parks the agent (usually at BASE)
@@ -86,6 +94,7 @@ class Simulation:
             previous_position = self.agent.position
 
             if same_cell_streak >= self.stuck_limit:
+                self.stopping_reason = "stuck_limit_reached"
                 break
 
         self.summary = self._build_summary()
@@ -104,6 +113,9 @@ class Simulation:
             "survived": agent_summary["alive"],
             "path_length": agent_summary["path_length"],
             "final_position": agent_summary["final_position"],
+            "visited_count": agent_summary["visited_count"],
+            "stopping_reason": self.stopping_reason,
+            "path": list(self.agent.path),
             "dynamic_hazard_events": self.hazards.total_events if self.hazards else 0,
         }
 
@@ -120,7 +132,9 @@ class Simulation:
         print(f"Science points collected: {self.summary['science_points_collected']}")
         print(f"Survived: {self.summary['survived']}")
         print(f"Path length: {self.summary['path_length']}")
+        print(f"Cells visited: {self.summary['visited_count']}")
         print(f"Final position: {self.summary['final_position']}")
+        print(f"Stopping reason: {self.summary['stopping_reason']}")
         print(f"Dynamic hazard events: {self.summary['dynamic_hazard_events']}")
 
 

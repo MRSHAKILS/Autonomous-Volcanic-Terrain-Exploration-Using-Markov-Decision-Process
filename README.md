@@ -4,7 +4,7 @@
 
 | Item       | Details                             |
 | ---------- | ----------------------------------- |
-| Course     | CSE 440 â€” Artificial Intelligence |
+| Course     | CSE 440 - Artificial Intelligence |
 | Section    | 1                                   |
 | Group      | 5                                   |
 | Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb]  |
@@ -160,7 +160,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Animated demo video generation
 - Final report and presentation slides in `others/`
 
-### Member 1 â€” MDP Core
+### Member 1 - MDP Core
 
 - Repository and project structure
 - Configuration system
@@ -171,7 +171,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Value iteration
 - Optimal policy extraction
 
-### Member 2 â€” Agent and Simulation
+### Member 2 - Agent and Simulation
 
 - `MDPExplorerAgent`
 - BASE-position initialization
@@ -181,7 +181,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Reward, hazard, science-point, and survival tracking
 - Mission summary and simulation loop
 
-### Member 3 â€” Visualization
+### Member 3 - Visualization
 
 - Matplotlib-based terrain rendering
 - Distinct colors for all seven terrain types
@@ -189,7 +189,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Saved visualization output
 - Terrain examples generated with different random seeds
 
-### Member 4 â€” Experiments
+### Member 4 - Experiments
 
 - MDP, random, and greedy comparison structure
 - Shared experiment metrics
@@ -272,6 +272,7 @@ The dependency list includes:
 - `numpy`
 - `matplotlib`
 - `pandas`
+- `tqdm`
 - `python-pptx` (only for regenerating the presentation files)
 - `python-docx` (only for converting the presentations to Word)
 
@@ -288,11 +289,17 @@ python main.py
 Optional arguments:
 
 ```bash
-python main.py --seed 10             # different terrain
-python main.py --size 20             # 20x20 grid
-python main.py --static              # disable dynamic hazards
-python main.py --steps 200           # longer step budget
+python main.py --seed 42 --size 15      # reproducible 15x15 terrain
+python main.py --steps 120              # set the simulation step limit
+python main.py --max-steps 120          # alias for --steps 120
+python main.py --static                 # disable dynamic hazards
+python main.py --terrain-only           # generate and save terrain only
+python main.py --coverage-target 0.70   # stop at 70% reachable-cell coverage
+python main.py --compare                # run MDP, Greedy, and Random experiments
 ```
+
+The comparison mode saves `outputs/experiment_results.csv` and
+`outputs/performance_plot.png` using the shared experiment implementation.
 
 Individual module demos:
 
@@ -310,7 +317,7 @@ python support/pptx_to_doc.py        # convert the PPTX decks to Word (.docx)
 
 ## Known Limitations and Future Work
 
-- Movement noise and hazard dynamics use fixed hand-chosen probabilities; they could be learned or made configurable.
+- Movement noise and hazard dynamics use configurable hand-chosen probabilities; future work could learn them from data.
 - The MDP state is position-only; adding energy or remaining-science to the state would let the planner reason about them exactly instead of via re-planning.
 - The agent is risk-neutral; a risk-sensitive objective could raise the survival rate further.
 - The `SCAN` action is priced but rarely useful; a fog-of-war POMDP extension would give it a real role.

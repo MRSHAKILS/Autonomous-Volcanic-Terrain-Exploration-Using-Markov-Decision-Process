@@ -18,6 +18,12 @@ DEFAULT_MDP_PARAMETERS = {
     },
 }
 
+DEFAULT_DYNAMIC_HAZARD_PARAMETERS = {
+    "gas_drift_probability": 0.15,
+    "lava_spread_probability": 0.08,
+    "lava_cooldown_steps": 6,
+}
+
 MOVEMENT_PROBABILITY_KEYS = [
     "intended_direction",
     "left_drift",
@@ -50,6 +56,7 @@ def validate_config(config: dict) -> None:
     _validate_default_probabilities(config.get("default_probabilities"))
     _validate_base_location(config.get("base_location"))
     _validate_mdp_parameters(config.get("mdp_parameters"))
+    _validate_dynamic_hazard_parameters(config.get("dynamic_hazard_parameters"))
 
 
 def get_mdp_parameters(config_path: Path = CONFIG_PATH) -> dict:
@@ -59,7 +66,7 @@ def get_mdp_parameters(config_path: Path = CONFIG_PATH) -> dict:
     except FileNotFoundError:
         return _copy_default_mdp_parameters()
 
-    mdp_parameters = config.get("mdp_parameters", {})
+    mdp_parameters = config.get("mdp_parameters") or {}
     merged = _copy_default_mdp_parameters()
 
     if "gamma" in mdp_parameters:
@@ -71,6 +78,20 @@ def get_mdp_parameters(config_path: Path = CONFIG_PATH) -> dict:
             merged["movement_probabilities"][key] = float(configured_movement[key])
 
     _validate_movement_probabilities(merged["movement_probabilities"])
+
+    return merged
+
+
+def get_dynamic_hazard_parameters(config_path: Path = CONFIG_PATH) -> dict:
+    """Return dynamic-hazard settings, using defaults for missing values."""
+    try:
+        config = load_config(config_path)
+    except FileNotFoundError:
+        return DEFAULT_DYNAMIC_HAZARD_PARAMETERS.copy()
+
+    merged = DEFAULT_DYNAMIC_HAZARD_PARAMETERS.copy()
+    merged.update(config.get("dynamic_hazard_parameters") or {})
+    _validate_dynamic_hazard_parameters(merged)
 
     return merged
 
@@ -151,6 +172,34 @@ def _validate_mdp_parameters(mdp_parameters: object) -> None:
             merged[key] = float(value)
 
         _validate_movement_probabilities(merged)
+
+
+def _validate_dynamic_hazard_parameters(parameters: object) -> None:
+    """Validate configured gas and lava update settings if present."""
+    if parameters is None:
+        return
+    if not isinstance(parameters, dict):
+        raise ValueError("dynamic_hazard_parameters must be a JSON object.")
+
+    allowed_keys = set(DEFAULT_DYNAMIC_HAZARD_PARAMETERS)
+    for key in parameters:
+        if key not in allowed_keys:
+            raise ValueError(f"Unknown dynamic hazard parameter: {key}")
+
+    for key in ["gas_drift_probability", "lava_spread_probability"]:
+        if key not in parameters:
+            continue
+
+        value = parameters[key]
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f"dynamic_hazard_parameters.{key} must be a number.")
+        if value < 0 or value > 1:
+            raise ValueError(f"dynamic_hazard_parameters.{key} must be between 0 and 1.")
+
+    if "lava_cooldown_steps" in parameters:
+        cooldown = parameters["lava_cooldown_steps"]
+        if isinstance(cooldown, bool) or not isinstance(cooldown, int) or cooldown <= 0:
+            raise ValueError("dynamic_hazard_parameters.lava_cooldown_steps must be a positive integer.")
 
 
 def _validate_movement_probabilities(probabilities: dict) -> None:

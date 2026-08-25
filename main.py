@@ -1,8 +1,9 @@
-"""End-to-end demo for the volcanic MDP explorer project.
+"""Command-line entry point for the volcanic MDP explorer project.
 
 Runs the full pipeline: terrain generation, MDP value iteration and policy
 extraction, the explorer-agent simulation (optionally with dynamic hazards),
-and the final mission-map visualization.
+and the final mission-map visualization. It also provides terrain-only and
+agent-comparison modes for convenient testing.
 """
 
 import argparse
@@ -43,6 +44,8 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--steps",
+        "--max-steps",
+        dest="steps",
         type=int,
         default=100,
         help="Maximum number of simulation steps. Default: 100.",
@@ -52,8 +55,29 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="Disable dynamic hazards (gas drift and lava flows) during the simulation.",
     )
+    parser.add_argument(
+        "--terrain-only",
+        action="store_true",
+        help="Generate, print, and save the terrain without running the MDP simulation.",
+    )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="Run the existing MDP, greedy, and random agent comparison experiments.",
+    )
+    parser.add_argument(
+        "--coverage-target",
+        type=float,
+        default=0.60,
+        help="Stop after visiting this fraction of reachable cells. Default: 0.60.",
+    )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if not 0 < args.coverage_target <= 1:
+        parser.error("--coverage-target must be greater than 0 and at most 1.")
+
+    return args
 
 
 def print_symbol_legend() -> None:
@@ -87,8 +111,18 @@ def print_cell_counts(terrain: Terrain) -> None:
 
 
 def main() -> None:
-    """Run the full exploration pipeline from terrain to mission map."""
+    """Run the selected project demo or comparison mode."""
     args = parse_arguments()
+
+    if args.compare:
+        from support.experiments import main as run_comparison
+
+        print_section_header("Project Title")
+        print(PROJECT_TITLE)
+        print_section_header("Agent Performance Comparison")
+        run_comparison()
+        return
+
     dynamic_hazards = not args.static
 
     print_section_header("Project Title")
@@ -107,11 +141,16 @@ def main() -> None:
     terrain.save_to_csv(csv_path)
     print(f"Generated terrain saved to: {csv_path}")
 
+    if args.terrain_only:
+        print_section_header("Symbol Legend")
+        print_symbol_legend()
+        return
+
     print_section_header("Step 2: MDP Value Iteration and Policy")
     simulation = Simulation(
         terrain,
         max_steps=args.steps,
-        coverage_target=0.60,
+        coverage_target=args.coverage_target,
         seed=args.seed,
         dynamic_hazards=dynamic_hazards,
     )

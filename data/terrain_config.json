@@ -32,5 +32,10 @@
       "right_drift": 0.10,
       "stay": 0.05
     }
+  },
+  "dynamic_hazard_parameters": {
+    "gas_drift_probability": 0.15,
+    "lava_spread_probability": 0.08,
+    "lava_cooldown_steps": 6
   }
 }

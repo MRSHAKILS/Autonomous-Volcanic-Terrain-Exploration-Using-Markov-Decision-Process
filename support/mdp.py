@@ -1,9 +1,10 @@
 """MDP formulation and value iteration for volcanic terrain exploration.
 
-Week 3 Part 1 focuses on the Markov Decision Process model only:
-states, actions, transition probabilities, rewards, value iteration, and policy
-extraction. Agent simulation, dynamic hazards, visualization, and experiments
-are intentionally left for later weeks.
+This module defines the state space, actions, transition probabilities,
+rewards, value iteration, and policy extraction used by the completed project.
+The resulting policy is consumed by the explorer agent and simulation, while
+dynamic hazards, visualization, and comparison experiments remain in their
+separate support modules.
 """
 
 import sys

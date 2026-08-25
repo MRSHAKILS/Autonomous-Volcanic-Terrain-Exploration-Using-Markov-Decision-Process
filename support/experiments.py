@@ -48,7 +48,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from support.agent import MDPExplorerAgent
-from support.config import load_config
+from support.config import get_mdp_parameters
 from support.mdp import ACTION_DELTAS, MOVEMENT_ACTIONS, STAY, VolcanicMDP
 from support.terrain import LAVA, ROCK, Terrain
 
@@ -63,24 +63,7 @@ STUCK_LIMIT = 8       # stop early if the agent stays in one cell this many step
 NUM_SEEDS = 20        # number of random terrains to average over
 
 
-def _discount_factor() -> float:
-    """Return the discount factor declared in data/terrain_config.json.
-
-    The project config sets ``mdp_parameters.gamma`` (0.90). We read it here
-    rather than relying on the VolcanicMDP default so the experiments use the
-    documented value. A higher gamma over-values distant science and makes the
-    risk-neutral MDP take deadly slip gambles for marginal expected reward.
-    """
-    try:
-        gamma = load_config().get("mdp_parameters", {}).get("gamma")
-        if isinstance(gamma, (int, float)) and 0.0 < float(gamma) < 1.0:
-            return float(gamma)
-    except (FileNotFoundError, ValueError, KeyError, TypeError):
-        pass
-    return 0.90
-
-
-GAMMA = _discount_factor()
+GAMMA = get_mdp_parameters()["gamma"]
 
 AGENT_MDP = "mdp"
 AGENT_RANDOM = "random"
