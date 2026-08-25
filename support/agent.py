@@ -4,6 +4,11 @@ The agent starts at the BASE cell and repeatedly asks the policy which action
 to take. Because movement is stochastic (see `VolcanicMDP.transition_probabilities`),
 each step samples one real outcome from that probability distribution instead
 of assuming the intended move always succeeds.
+
+Science samples follow a collect-once rule: when the agent first reaches a
+science cell it gathers the sample, the cell becomes ordinary ground, and the
+agent re-runs value iteration so the policy targets the next objective instead
+of camping on one high-value cell.
 """
 
 import random
@@ -41,6 +46,7 @@ class MDPExplorerAgent:
         self.cumulative_reward = 0.0
         self.hazards_entered = 0
         self.science_points_collected = 0
+        self.science_collected_positions: list[tuple[int, int]] = []
         self.alive = True
 
     def find_base(self) -> tuple[int, int]:
@@ -74,7 +80,46 @@ class MDPExplorerAgent:
         self.path.append(self.position)
         self.visited.add(self.position)
 
+        if self.alive and self.terrain.get_cell(*self.position) == SCIENCE:
+            self._collect_science(self.position)
+
         return True
+
+    def _collect_science(self, position: tuple[int, int]) -> None:
+        """Apply the collect-once rule: gather the sample, then re-plan.
+
+        The science cell becomes ordinary ground so its reward can only be
+        earned a single time, and the policy is recomputed so the agent heads
+        to the next objective instead of camping here.
+        """
+        self.science_collected_positions.append(position)
+        self.terrain.set_cell(position[0], position[1], SAFE)
+        self.replan()
+
+    def check_current_cell(self) -> None:
+        """Re-check the cell under the agent after the environment changed.
+
+        Dynamic hazards can move onto the agent between its own steps; being
+        caught by a lava flow is fatal.
+        """
+        if not self.alive:
+            return
+
+        if self.terrain.get_cell(*self.position) == LAVA:
+            self.hazards_entered += 1
+            self.alive = False
+
+    def replan(self) -> None:
+        """Re-run value iteration on the current terrain and refresh the policy.
+
+        Baseline agents that override ``choose_action`` run with an empty
+        policy, so there is nothing to recompute for them.
+        """
+        if not self.policy:
+            return
+
+        self.mdp.value_iteration()
+        self.policy = self.mdp.extract_policy()
 
     def _sample_next_state(self, action: str) -> tuple[int, int]:
         """Randomly sample a real outcome from the action's transition probabilities."""

@@ -9,6 +9,7 @@ if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from support.agent import MDPExplorerAgent
+from support.hazards import DynamicHazards
 from support.mdp import VolcanicMDP
 from support.terrain import Terrain
 from support.utils import print_section_header
@@ -23,18 +24,22 @@ class Simulation:
         max_steps: int = 100,
         coverage_target: float = 0.60,
         seed: int = 42,
+        stuck_limit: int = 8,
+        dynamic_hazards: bool = False,
     ) -> None:
         """Build the MDP, compute a policy, and create the agent ready to run."""
         self.terrain = terrain
         self.max_steps = max_steps
         self.coverage_target = coverage_target
         self.seed = seed
+        self.stuck_limit = stuck_limit
 
         self.mdp = VolcanicMDP(terrain)
         self.mdp.value_iteration()
         self.policy = self.mdp.extract_policy()
 
         self.agent = MDPExplorerAgent(terrain, self.mdp, self.policy, rng=random.Random(seed))
+        self.hazards = DynamicHazards(terrain, seed=seed) if dynamic_hazards else None
         self.summary = None
 
     def calculate_coverage(self) -> float:
@@ -46,15 +51,41 @@ class Simulation:
 
         return len(self.agent.visited) / total_reachable * 100
 
-    def run(self) -> dict:
-        """Run the agent until max steps, death, or the coverage target is reached."""
+    def run(self, on_step=None) -> dict:
+        """Run the agent until max steps, death, coverage, or a long hold at one cell.
+
+        Args:
+            on_step: Optional callback invoked with this simulation after each
+                completed step, e.g. to record frames for a demo video.
+        """
+        previous_position = self.agent.position
+        same_cell_streak = 0
+
         for _ in range(self.max_steps):
             if not self.agent.alive:
                 break
 
             self.agent.step()
 
+            # Dynamic hazards evolve after the agent moves. A lava flow can
+            # engulf the agent, and any change makes the agent re-plan.
+            if self.hazards is not None and self.hazards.step():
+                self.agent.check_current_cell()
+                if self.agent.alive:
+                    self.agent.replan()
+
+            if on_step is not None:
+                on_step(self)
+
             if self.calculate_coverage() >= self.coverage_target * 100:
+                break
+
+            # The optimal policy eventually parks the agent (usually at BASE)
+            # once every objective is collected; stop the mission at that point.
+            same_cell_streak = same_cell_streak + 1 if self.agent.position == previous_position else 0
+            previous_position = self.agent.position
+
+            if same_cell_streak >= self.stuck_limit:
                 break
 
         self.summary = self._build_summary()
@@ -73,6 +104,7 @@ class Simulation:
             "survived": agent_summary["alive"],
             "path_length": agent_summary["path_length"],
             "final_position": agent_summary["final_position"],
+            "dynamic_hazard_events": self.hazards.total_events if self.hazards else 0,
         }
 
     def print_summary(self) -> None:
@@ -89,15 +121,18 @@ class Simulation:
         print(f"Survived: {self.summary['survived']}")
         print(f"Path length: {self.summary['path_length']}")
         print(f"Final position: {self.summary['final_position']}")
+        print(f"Dynamic hazard events: {self.summary['dynamic_hazard_events']}")
 
 
 if __name__ == "__main__":
-    terrain = Terrain(seed=42)
-    terrain.generate()
+    for dynamic in (False, True):
+        terrain = Terrain(seed=42)
+        terrain.generate()
 
-    print_section_header("Simulation Start")
-    print(f"Grid size: {terrain.rows}x{terrain.cols}")
+        mode = "dynamic hazards" if dynamic else "static terrain"
+        print_section_header(f"Simulation Start ({mode})")
+        print(f"Grid size: {terrain.rows}x{terrain.cols}")
 
-    simulation = Simulation(terrain, max_steps=100, coverage_target=0.60, seed=42)
-    simulation.run()
-    simulation.print_summary()
+        simulation = Simulation(terrain, max_steps=100, coverage_target=0.60, seed=42, dynamic_hazards=dynamic)
+        simulation.run()
+        simulation.print_summary()

@@ -274,8 +274,9 @@ class VolcanicMDP:
             print(" ".join(symbols))
 
 
-# TODO: In later updates, consider dynamic hazards and richer visual policy
-# maps without changing the public MDP interface.
+# Dynamic hazards are handled outside this class (support/hazards.py): the
+# terrain changes, then value_iteration() and extract_policy() are re-run on
+# the updated grid, so the public MDP interface stays unchanged.
 
 
 if __name__ == "__main__":

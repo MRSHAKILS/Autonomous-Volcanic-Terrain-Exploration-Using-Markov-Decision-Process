@@ -30,7 +30,7 @@ This repository is for a CSE 440 Artificial Intelligence semester project. The p
   <em>Project poster for the autonomous volcanic terrain exploration system.</em>
 </p>
 
-Update 1 code from all four members has been merged. The current implementation includes volcanic terrain generation, the core MDP model, value iteration, policy extraction, an MDP-based explorer agent, a simulation loop, terrain visualization, and baseline experiment outputs. Dynamic hazards and final demo/report materials are not complete yet.
+The implementation is complete. It includes volcanic terrain generation, the core MDP model, value iteration, policy extraction, an MDP-based explorer agent with a collect-once science rule and on-line re-planning, dynamic hazards (drifting gas clouds and spreading lava flows), a simulation loop, terrain and mission-path visualization, an animated demo video, baseline comparison experiments, and the final report and presentation slides.
 
 ## Problem Statement
 
@@ -50,7 +50,7 @@ An MDP provides a structured way to represent:
 - the reward or penalty for entering different terrain cells,
 - and a policy that recommends the best action for each state.
 
-## Current AI Formulation
+## AI Formulation
 
 ### States
 
@@ -71,6 +71,14 @@ Rewards guide the agent's behavior. Science points and the base station provide 
 ### Policy and Value Iteration
 
 Value iteration estimates state values, and the resulting policy selects the best action for each valid state.
+
+### Collect-Once Science Rule and Re-Planning
+
+A science sample can only be collected once. When the agent first reaches a science cell, the sample is gathered, the cell becomes ordinary ground, and the agent re-runs value iteration so the policy targets the next objective instead of camping on one high-value cell.
+
+### Dynamic Hazards
+
+The environment changes while the agent explores (`support/hazards.py`): gas clouds can drift into a neighboring safe cell, and lava can spill into a neighboring safe cell and cool back to safe ground after a few steps. Only safe cells are ever converted, so the base, science points, rock, and craters are never destroyed and the MDP state space stays fixed. Whenever the terrain changes, the agent re-plans with a fresh round of value iteration, and a lava flow that reaches the agent's cell destroys it.
 
 ## Terrain Symbols
 
@@ -98,6 +106,12 @@ volcanic-mdp-explorer/
 |   `-- terrain_config.json
 |-- images/
 |   |-- poster.png
+|   |-- final_map.png
+|   |-- policy_map.png
+|   |-- performance_plot.png
+|   |-- hazards_before.png
+|   |-- hazards_after.png
+|   |-- demo_video.gif
 |   |-- terrain_map_seed_1.png
 |   |-- terrain_map_seed_7.png
 |   `-- terrain_map_seed_23.png
@@ -108,21 +122,43 @@ volcanic-mdp-explorer/
 |   |-- terrain.py
 |   |-- mdp.py
 |   |-- agent.py
+|   |-- hazards.py
 |   |-- simulation.py
 |   |-- visualization.py
+|   |-- demo_video.py
+|   |-- make_slides.py
+|   |-- pptx_to_doc.py
 |   `-- experiments.py
-|-- outputs/
+|-- outputs/                  (generated locally, gitignored)
 |   |-- .gitkeep
 |   |-- experiment_results.csv
 |   |-- final_map.png
-|   `-- performance_plot.png
+|   |-- policy_map.png
+|   |-- performance_plot.png
+|   `-- demo_video.mp4
 `-- others/
-    `-- .gitkeep
+    |-- .gitkeep
+    |-- final_report.tex
+    |-- final_report.pdf        (8-page IEEE double-column final report)
+    |-- final_presentation.pptx
+    |-- final_presentation.docx (Word version of the final deck)
+    |-- update_report.tex
+    |-- update_report.pdf       (2-page IEEE double-column update report)
+    |-- update_presentation.pptx
+    |-- update_presentation.docx (Word version of the update deck)
+    `-- demo_video.mp4          (one-minute project demo run)
 ```
 
-## Update 1 Progress
+## Progress
 
-Update 1 code from all four members has been merged.
+Update 1 code from all four members was merged, and the final update completes the remaining roadmap items:
+
+- Collect-once science rule with on-line re-planning built into the core agent (no more camping on one science cell)
+- Dynamic hazards: drifting gas clouds and spreading/cooling lava flows, with re-planning after every terrain change
+- The mission map now shows the real simulated agent path and collected samples
+- `main.py` runs the full pipeline end to end
+- Animated demo video generation
+- Final report and presentation slides in `others/`
 
 ### Member 1 â€” MDP Core
 
@@ -164,7 +200,7 @@ Update 1 code from all four members has been merged.
 
 ### Terrain Visualization
 
-`support/visualization.py` renders the terrain grid with matplotlib, using a distinct color for each of the seven cell types—Safe, Lava, Crater, Gas, Rock, Science, and Base—together with a title and legend. The following examples were generated using different random seeds.
+`support/visualization.py` renders the terrain grid with matplotlib, using a distinct color for each of the seven cell types (Safe, Lava, Crater, Gas, Rock, Science, and Base), together with a title and legend. The following examples were generated using different random seeds.
 
 <table>
   <tr>
@@ -190,7 +226,27 @@ Update 1 code from all four members has been merged.
 </p>
 
 <p align="center">
-  <em>Update 1 test visualization of the volcanic terrain. The dashed route is labeled in the image as a sample path for layout testing, not a final autonomous-agent result.</em>
+  <em>Actual simulation result (seed 42, dynamic hazards on): the solid route is the real path taken by the MDP explorer agent (start ★ at BASE, end ■), and gold stars mark the cells where science samples were collected.</em>
+</p>
+
+### Policy Visualization
+
+<p align="center">
+  <img src="images/policy_map.png" alt="Value-iteration policy drawn on the terrain" width="600">
+</p>
+
+<p align="center">
+  <em>The value-iteration policy: one optimal action per walkable cell. The flow field bends around lava and craters while converging on science points and the base.</em>
+</p>
+
+### One-Minute Demo Video
+
+<p align="center">
+  <img src="images/demo_video.gif" alt="One-minute demo run of the project" width="700">
+</p>
+
+<p align="center">
+  <em>The one-minute project demo run, screen-capture style: the full pipeline executes in a terminal (terrain generation, value iteration, the mission), the generated mission map opens, then the baseline comparison runs and its performance plot opens. The submitted MP4 is at <a href="others/demo_video.mp4">others/demo_video.mp4</a>.</em>
 </p>
 
 ### Performance Comparison
@@ -200,7 +256,7 @@ Update 1 code from all four members has been merged.
 </p>
 
 <p align="center">
-  <em>Generated comparison visualization for the implemented experiment framework.</em>
+  <em>MDP vs Greedy vs Random averaged over 20 random terrains. The MDP agent is the only one with positive average reward, and it survives twice as often as the greedy baseline while entering roughly one-fifth as many hazards.</em>
 </p>
 
 ## Requirements
@@ -211,82 +267,71 @@ Install the project dependencies with:
 pip install -r requirements.txt
 ```
 
-The dependency list currently includes:
+The dependency list includes:
 
 - `numpy`
 - `matplotlib`
 - `pandas`
-- `tqdm`
+- `python-pptx` (only for regenerating the presentation files)
+- `python-docx` (only for converting the presentations to Word)
+
+Generating `outputs/demo_video.mp4` also uses the `ffmpeg` command-line tool if it is installed; without it, the demo script saves a GIF instead. The LaTeX reports in `others/` compile with any modern TeX engine (e.g., `tectonic others/final_report.tex`).
 
 ## How to Run
 
-Run the terrain demo:
+Run the full pipeline (terrain → MDP → agent simulation → mission map), with dynamic hazards on by default:
 
 ```bash
 python main.py
 ```
 
-Optional terrain arguments:
+Optional arguments:
 
 ```bash
-python main.py --seed 10
-python main.py --size 20
-python main.py --seed 15 --size 20
+python main.py --seed 10             # different terrain
+python main.py --size 20             # 20x20 grid
+python main.py --static              # disable dynamic hazards
+python main.py --steps 200           # longer step budget
 ```
 
-Run the MDP core test:
+Individual module demos:
 
 ```bash
-python support/mdp.py
+python support/mdp.py                # MDP core: value iteration and policy grid
+python support/agent.py              # short agent rollout
+python support/simulation.py         # simulation loop, static and dynamic runs
+python support/hazards.py            # watch the terrain evolve for 20 steps
+python support/visualization.py      # render the mission map with the real path
+python support/demo_video.py         # generate the one-minute demo-run video
+python support/experiments.py        # MDP vs Random vs Greedy comparison
+python support/make_slides.py        # regenerate the presentation PPTX files
+python support/pptx_to_doc.py        # convert the PPTX decks to Word (.docx)
 ```
 
-Run the agent demo:
+## Known Limitations and Future Work
 
-```bash
-python support/agent.py
-```
+- Movement noise and hazard dynamics use fixed hand-chosen probabilities; they could be learned or made configurable.
+- The MDP state is position-only; adding energy or remaining-science to the state would let the planner reason about them exactly instead of via re-planning.
+- The agent is risk-neutral; a risk-sensitive objective could raise the survival rate further.
+- The `SCAN` action is priced but rarely useful; a fog-of-war POMDP extension would give it a real role.
 
-Run the simulation loop:
+## Development Roadmap
 
-```bash
-python support/simulation.py
-```
+- Week 1: Planning and repository setup. ✅
+- Week 2: Terrain generator. ✅
+- Week 3: MDP formulation and value iteration. ✅
+- Week 4: Agent simulation and dynamic hazards. ✅
+- Week 5: Visualization and comparison experiments. ✅
+- Week 6: Demo, report, slides, and final polish. ✅
 
-Generate the terrain visualization:
+## Generated Outputs
 
-```bash
-python support/visualization.py
-```
-
-Run the experiment comparison:
-
-```bash
-python support/experiments.py
-```
-
-## Current Limitations
-
-- Dynamic hazards are not implemented yet.
-- The exploration map currently uses a sample/test path, not a final simulation path.
-- Final report, slides, demo video, and presentation polish are not complete yet.
-
-## Planned Development Roadmap
-
-- Week 1: Planning and repository setup.
-- Week 2: Terrain generator.
-- Week 3: MDP formulation and value iteration.
-- Week 4: Agent simulation and dynamic hazards.
-- Week 5: Visualization and comparison experiments.
-- Week 6: Demo, report, slides, and final polish.
-
-## Future Outputs
-
-Generated output files currently include:
+Running the commands above regenerates every artifact locally in `outputs/` (gitignored):
 
 - `outputs/experiment_results.csv`
 - `outputs/performance_plot.png`
 - `outputs/final_map.png`
+- `outputs/policy_map.png`
+- `outputs/demo_video.mp4`
 
-The following output is still planned for later:
-
-- `demo_video.mp4`
+Committed copies of the final visuals live in `images/`. The course deliverables live in `others/`: the 8-page IEEE-format final report (PDF + LaTeX source), the final presentation PPTX, the 2-page update report (PDF + LaTeX source), the update presentation PPTX, and the one-minute demo video.

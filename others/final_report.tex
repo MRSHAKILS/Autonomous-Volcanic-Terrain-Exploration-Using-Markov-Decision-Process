@@ -1,0 +1,493 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{fancyhdr}
+\usepackage{url}
+
+\graphicspath{{../images/}}
+
+% Course header above the top margin of the first page (per course manual:
+% course code & section, project group number, names and IDs of all members).
+\fancypagestyle{firstpageheader}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyhead[C]{\footnotesize
+    CSE 440 (Section 1) \quad$\cdot$\quad Project Group 5 \quad$\cdot$\quad
+    Shakil Ahmed (ID: 2XXXXXXXXX), Fahim Foysal (ID: 2XXXXXXXXX), Shefa Tabassum (ID: 2XXXXXXXXX), Tanvir Ahmed (ID: 2XXXXXXXXX)}%
+}
+\setlength{\headheight}{14pt}
+
+\begin{document}
+
+\title{Autonomous Volcanic Terrain Exploration\\Using a Markov Decision Process}
+
+\author{
+  \IEEEauthorblockN{Shakil Ahmed, Fahim Foysal, Shefa Tabassum, and Tanvir Ahmed}
+  \IEEEauthorblockA{Group 5, CSE 440, Artificial Intelligence, Section 1\\
+  Department of Electrical and Computer Engineering, North South University\\
+  Instructor: Dr.\ Mohammad Shifat-E-Rabbi}
+}
+
+\maketitle
+\thispagestyle{firstpageheader}
+
+\begin{abstract}
+Volcanic environments are hazardous, uncertain, and largely inaccessible to humans, which makes them a natural target for autonomous robotic exploration. This project designs, implements, and evaluates a complete decision-theoretic exploration system for a simulated volcanic terrain. The environment is a procedurally generated grid containing lava, craters, gas-emission zones, impassable rock, science points, and a base station. The exploration task is modeled as a Markov Decision Process (MDP) with stochastic movement, and solved exactly with value iteration. Two extensions move the system beyond a textbook MDP: a \emph{collect-once} science rule with on-line re-planning, which prevents the agent from exploiting a single high-reward cell, and \emph{dynamic hazards} (drifting gas clouds and spreading, cooling lava flows) that force the agent to adapt its plan while the mission is underway. We evaluate the MDP agent against random and greedy nearest-unvisited baselines on 20 independently generated terrains. The MDP agent is the only agent with positive average reward ($+42.0$ versus $-124.5$ and $-179.5$), doubles the survival rate of the greedy baseline (60\% versus 30\%), and enters roughly one-fifth as many hazard cells, demonstrating that sequential decision-theoretic planning is an effective and practical foundation for exploration in hazardous, changing environments.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Markov decision process, value iteration, autonomous exploration, path planning, dynamic environments, mobile robotics
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Volcanic terrain is among the most dangerous environments a field scientist can enter. Lava flows, unstable craters, toxic gas emissions, and impassable rock formations make direct human exploration risky, and the conditions can change from one minute to the next. Robotic explorers have therefore long been proposed, and occasionally deployed, as with the Dante~II rappelling robot at Mount Spurr~\cite{bares1999dante}, to collect scientific measurements in places people cannot safely go.
+
+An autonomous explorer in such an environment faces a fundamentally \emph{sequential} decision problem. Every movement decision trades off three competing objectives: reaching scientifically valuable locations, avoiding terrain that damages or destroys the robot, and coping with actuation uncertainty, since a rover on loose volcanic ash cannot guarantee that a commanded move will succeed. A purely reactive controller, or a shortest-path planner that ignores uncertainty, handles none of these trade-offs in a principled way.
+
+This project builds a complete exploration stack around the classical answer to sequential decision-making under uncertainty: the Markov Decision Process (MDP)~\cite{bellman1957,puterman1994}. Our contributions are:
+
+\begin{enumerate}
+  \item a procedural volcanic terrain generator producing reproducible grid worlds with seven cell types and bounded hazard density;
+  \item an exact MDP formulation of the exploration task: stochastic movement with directional slip, a hazard-and-science reward model, and value iteration with greedy policy extraction;
+  \item a \emph{collect-once} science rule with on-line re-planning that turns a static optimal policy into a purposeful multi-objective mission;
+  \item a \emph{dynamic hazard} model in which gas clouds drift and lava spreads and cools during the mission, with the agent re-planning after every terrain change; and
+  \item a controlled experimental comparison against random and greedy baselines across 20 procedurally generated terrains, with all code, figures, and a demonstration video available in the project repository.
+\end{enumerate}
+
+The remainder of this report is organized as follows. Section~\ref{sec:background} reviews the necessary background. Section~\ref{sec:problem} defines the environment and the exploration task. Section~\ref{sec:method} presents the MDP formulation and the two on-line extensions. Section~\ref{sec:implementation} describes the software architecture. Section~\ref{sec:experiments} reports the experimental evaluation, Section~\ref{sec:limitations} discusses limitations and future work, and Section~\ref{sec:conclusion} concludes.
+
+\section{Background and Related Work}\label{sec:background}
+
+\subsection{Markov Decision Processes}
+
+An MDP is a tuple $(\mathcal{S}, \mathcal{A}, P, R, \gamma)$, where $\mathcal{S}$ is a set of states, $\mathcal{A}$ a set of actions, $P(s' \mid s, a)$ the probability of reaching state $s'$ when taking action $a$ in state $s$, $R(s, a, s')$ the immediate reward of that transition, and $\gamma \in (0, 1)$ a discount factor that trades immediate against future reward~\cite{puterman1994, suttonbarto2018}. A (deterministic, stationary) policy $\pi : \mathcal{S} \to \mathcal{A}$ prescribes an action in every state. The value of a state under the optimal policy satisfies the Bellman optimality equation~\cite{bellman1957}:
+\begin{equation}
+  V^{*}(s) = \max_{a \in \mathcal{A}} \sum_{s'} P(s' \mid s, a)\left[ R(s, a, s') + \gamma V^{*}(s') \right].
+  \label{eq:bellman}
+\end{equation}
+
+Value iteration solves \eqref{eq:bellman} by turning it into an update rule and applying it repeatedly until the values converge; the resulting greedy policy is optimal for the model~\cite{puterman1994}.
+
+\subsection{Choice of Solution Method}
+
+Three families of methods could solve our planning problem, and it is worth being explicit about why exact value iteration is the right one here.
+
+\subsubsection{Value iteration} The Bellman backup is a $\gamma$-contraction in the max norm, so value iteration converges geometrically to the unique fixed point $V^{*}$ from any initialization~\cite{puterman1994}. Each sweep costs $O(|\mathcal{S}| \cdot |\mathcal{A}| \cdot b)$, where $b \le 4$ is the number of distinct successor states per action under our slip model. With $|\mathcal{S}| \approx 85$, a full solve takes milliseconds, and, critically for our on-line re-planning, a solve started from the \emph{previous} value function (a warm start) converges in only a handful of sweeps, because collecting one sample or moving one gas cloud perturbs the value landscape only locally.
+
+\subsubsection{Policy iteration} Policy iteration would converge in fewer (but more expensive) iterations; at our scale the difference is irrelevant, and value iteration's incremental warm-start behavior is a better fit for frequent re-planning.
+
+\subsubsection{Model-free learning} Reinforcement-learning methods such as Q-learning~\cite{suttonbarto2018} estimate values from sampled experience and shine when the transition model is unknown. Our transition model is known by construction, so learning would only add sample noise and hyperparameters while discarding the exactness guarantee. We therefore reserve learning-based methods for the future-work setting where the hazard dynamics must be estimated from data (Section~\ref{sec:limitations}).
+
+\subsection{Related Work}
+
+MDPs and their partially observable generalization (POMDPs)~\cite{kaelbling1998} are standard models for robot navigation and exploration under uncertainty~\cite{thrun2005, lavalle2006}. Grid-world MDP formulations with directional slip are a canonical benchmark in AI education and research~\cite{russellnorvig2021}, and decision-theoretic planning has been applied to planetary-rover activity planning~\cite{bresina2002}, where, as in our setting, the robot must weigh scientific reward against resource and safety constraints. Volcanic robotics specifically has been explored with the Dante~II robot~\cite{bares1999dante}, which descended into an active crater to sample gases, motivating exactly the class of autonomy this project simulates. Our project's contribution is educational and integrative: a single, fully reproducible system that connects procedural environment generation, exact MDP planning, on-line re-planning, and a controlled baseline comparison.
+
+\section{Problem Statement}\label{sec:problem}
+
+\subsection{Environment}
+
+The environment is an $N \times N$ grid (default $10 \times 10$) in which every cell has one of seven types: \textsc{safe} ground, \textsc{lava}, \textsc{crater}, \textsc{gas} emission zone, impassable \textsc{rock}, a \textsc{science} point, or the \textsc{base} station. Terrains are generated procedurally from a seed (Algorithm~\ref{alg:terrain}): each non-base cell is sampled independently from configurable type probabilities, and the combined probability of hazard cells (lava, crater, gas) is capped at $0.30$ (rescaling the three hazard probabilities proportionally when the configuration exceeds the cap) so that generated maps remain traversable. The generator, cell-type probabilities, grid size, base location, discount factor, and movement probabilities are all set in a single JSON configuration file (Table~\ref{tab:config}), and every generated terrain can be saved to and reloaded from CSV for reproducibility, with validation that a loaded grid is rectangular, uses only known cell types, and contains exactly one base station. Fig.~\ref{fig:terrains} shows three example terrains.
+
+\begin{algorithm}[t]
+  \caption{Procedural terrain generation}
+  \label{alg:terrain}
+  \begin{algorithmic}[1]
+    \REQUIRE grid size $N$, seed, type probabilities $p$
+    \STATE rescale $p_{\textsc{lava}}, p_{\textsc{crater}}, p_{\textsc{gas}}$ so their sum $\le 0.30$
+    \STATE initialize an $N \times N$ grid of \textsc{safe} cells
+    \FORALL{cells $(r, c)$ except the base location}
+      \STATE draw $u \sim \mathrm{Uniform}(0, 1)$ from the seeded generator
+      \STATE assign the cell type by inverse transform over $p$
+    \ENDFOR
+    \STATE place \textsc{base} at the configured base location
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{table}[t]
+  \caption{Configuration parameters (\texttt{data/terrain\_config.json}).}
+  \label{tab:config}
+  \centering
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{llr}
+    \toprule
+    Group & Parameter & Value \\
+    \midrule
+    Grid & rows $\times$ columns & $10 \times 10$ \\
+         & base location & $(9, 0)$ \\
+    \midrule
+    Cell type & safe & $0.50$ \\
+    probabilities & lava & $0.10$ \\
+         & crater & $0.08$ \\
+         & gas & $0.07$ \\
+         & rock & $0.15$ \\
+         & science point & $0.10$ \\
+    \midrule
+    MDP & discount factor $\gamma$ & $0.90$ \\
+        & intended direction & $0.75$ \\
+        & left / right drift & $0.10$ each \\
+        & stall & $0.05$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.32\columnwidth]{terrain_map_seed_1.png}\hfill
+  \includegraphics[width=0.32\columnwidth]{terrain_map_seed_7.png}\hfill
+  \includegraphics[width=0.32\columnwidth]{terrain_map_seed_23.png}
+  \caption{Procedurally generated volcanic terrains (seeds 1, 7, and 23). Colors: beige = safe, red = lava, purple = crater, green = gas, gray = rock, gold = science, blue = base.}
+  \label{fig:terrains}
+\end{figure}
+
+\subsection{Task}
+
+An agent starts at the base station and must (i) collect science samples, (ii) avoid or minimize exposure to hazards (entering lava destroys the agent, while craters and gas are survivable but costly), (iii) act robustly under movement uncertainty, and (iv) adapt when the terrain itself changes during the mission. The mission ends when the agent is destroyed, exhausts its step budget (100 steps), reaches a coverage target, or parks on one cell long enough to be considered finished.
+
+\section{Methodology}\label{sec:method}
+
+\subsection{MDP Formulation}
+
+\subsubsection{States} Each state is the agent's grid position $(r, c)$. Rock cells are excluded, so $\mathcal{S}$ is the set of walkable cells; on the default map, $|\mathcal{S}| \approx 85$.
+
+\subsubsection{Actions} $\mathcal{A} = \{\textsc{up}, \textsc{down}, \textsc{left}, \textsc{right}, \textsc{stay}, \textsc{scan}\}$. \textsc{stay} and \textsc{scan} are deterministic self-transitions; \textsc{scan} is priced separately and reserved for a future sensing extension (Section~\ref{sec:limitations}).
+
+\subsubsection{Transition model} Movement is stochastic with directional slip. Let $m(s, a)$ denote the deterministic result of applying movement $a$ in state $s$, clipped so that any move off the grid or into rock returns $s$ itself. For a movement action $a$ with left and right perpendicular directions $a_{L}$ and $a_{R}$, the transition distribution is
+\begin{align}
+  P(s' \mid s, a) = \; & 0.75\,[\,s' = m(s, a)\,] + 0.10\,[\,s' = m(s, a_{L})\,] \nonumber \\
+  & + 0.10\,[\,s' = m(s, a_{R})\,] + 0.05\,[\,s' = s\,],
+  \label{eq:transition}
+\end{align}
+where $[\cdot]$ is the indicator function and the probability mass of coinciding outcomes is summed (e.g., next to a wall, the blocked intended move and the stall outcome both map to $s$). \textsc{stay} and \textsc{scan} are deterministic self-transitions. This model captures a rover slipping on ash or loose gravel while keeping the transition function exact and easy to enumerate: every state--action pair has at most four distinct successors.
+
+\subsubsection{Reward model} Rewards are assigned on entering a cell, as listed in Table~\ref{tab:rewards}. The ordering encodes the mission priorities: science is worth a risky detour, gas is unpleasant, craters are seriously damaging, and lava is catastrophic. A small penalty on safe ground gives the agent urgency, a moderate blocked-move penalty discourages bumping into walls, and the base station provides a mild positive reward that makes parking at base the natural end-of-mission behavior.
+
+\begin{table}[t]
+  \caption{Reward function.}
+  \label{tab:rewards}
+  \centering
+  \begin{tabular}{lr}
+    \toprule
+    Event & Reward \\
+    \midrule
+    Enter a safe cell        & $-1$   \\
+    Enter the base station   & $+5$   \\
+    Collect a science sample & $+20$  \\
+    Enter a gas zone         & $-15$  \\
+    Enter a crater           & $-40$  \\
+    Enter lava (fatal)       & $-100$ \\
+    Blocked or invalid move  & $-5$   \\
+    Scan                     & $-2$   \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Exploration bonus} The reward function additionally supports a visitation-aware mode used during \emph{execution accounting}: entering a not-yet-visited safe or science cell earns a novelty bonus of $+8$, while re-entering an already-visited cell costs an extra $-2$. Planning uses the visitation-free rewards of Table~\ref{tab:rewards} (the planner's state does not track visitation), so the bonus does not distort the optimal policy; it makes the \emph{reported} cumulative reward reflect exploration progress, rewarding agents that cover new ground over agents that shuttle repeatedly over the same cells. All three agents in Section~\ref{sec:experiments} are scored with the identical accounting.
+
+\subsubsection{Discount factor} We use $\gamma = 0.90$, read from the project configuration. This value was tuned empirically: a higher $\gamma$ over-values distant science points and makes the risk-neutral planner accept deadly slip gambles next to lava for marginal expected reward, while a lower $\gamma$ makes the agent too myopic to leave the neighborhood of the base.
+
+\subsection{Planning: Value Iteration}
+
+Algorithm~\ref{alg:vi} summarizes the planner. Values are initialized to zero and updated with synchronous Bellman backups until the largest change falls below $\theta = 10^{-4}$ or 1000 sweeps have run; on the default map, convergence takes well under a second. The policy is the greedy action with respect to the converged values,
+\begin{equation}
+  \pi(s) = \arg\max_{a \in \mathcal{A}} \sum_{s'} P(s' \mid s, a)\left[ R(s, a, s') + \gamma V(s') \right].
+  \label{eq:policy}
+\end{equation}
+Fig.~\ref{fig:policy} visualizes an extracted policy: arrows point along the optimal action in every walkable cell, and the flow field visibly bends around lava and craters while converging on science points.
+
+\begin{algorithm}[t]
+  \caption{Value iteration with greedy policy extraction}
+  \label{alg:vi}
+  \begin{algorithmic}[1]
+    \STATE $V(s) \leftarrow 0$ for all $s \in \mathcal{S}$
+    \REPEAT
+      \STATE $\Delta \leftarrow 0$
+      \FORALL{$s \in \mathcal{S}$}
+        \STATE $v \leftarrow V(s)$
+        \STATE $V(s) \leftarrow \max_{a} \sum_{s'} P(s'{\mid}s,a) [R(s,a,s') + \gamma V(s')]$
+        \STATE $\Delta \leftarrow \max(\Delta, |v - V(s)|)$
+      \ENDFOR
+    \UNTIL{$\Delta < \theta$ \textbf{or} 1000 sweeps}
+    \STATE $\pi(s) \leftarrow \arg\max_{a} \sum_{s'} P(s'{\mid}s,a) [R(s,a,s') + \gamma V(s')]$
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.86\columnwidth]{policy_map.png}
+  \caption{The extracted policy for the seed-42 terrain. Arrows show the optimal action in each walkable cell; dots mark \textsc{stay}. The flow field routes around lava (red) and craters (purple) while converging on science points (gold).}
+  \label{fig:policy}
+\end{figure}
+
+\subsection{Collect-Once Science with On-Line Re-Planning}
+
+A static MDP with the reward model of Table~\ref{tab:rewards} has a degenerate optimal behavior: since a science cell pays $+20$ on every entry, the optimal policy is to reach one science cell and exploit it forever. Early versions of our simulation exhibited exactly this ``camping'' behavior: 100 steps spent on a single cell.
+
+We resolve it with a collect-once rule implemented in the agent itself: when the agent first reaches a science cell, the sample is collected, the cell is converted to ordinary safe ground, and the agent immediately re-runs value iteration on the updated terrain and re-extracts its policy. Because the previous value function is retained as a warm start, each re-plan converges in a handful of sweeps. The result is qualitatively different behavior: the agent visits science points in an efficient risk-adjusted order and then returns toward base, rather than farming a single reward.
+
+\subsection{Dynamic Hazards}
+
+Real volcanic terrain does not hold still, so the environment evolves while the agent is exploring. After every agent step:
+
+\begin{itemize}
+  \item each \textbf{gas cloud} drifts, with probability $0.15$, into a uniformly chosen neighboring safe cell (its previous cell reverts to safe);
+  \item each \textbf{lava cell} spills, with probability $0.08$, into a neighboring safe cell; a spilled flow cools back to safe ground after 6 steps, while original lava is permanent.
+\end{itemize}
+
+Two design rules keep the model well-behaved. First, only \textsc{safe} cells are ever converted, so the base, science points, rock, and craters are never destroyed, and the walkable state space $\mathcal{S}$ is invariant, so the MDP's states never need rebuilding. Second, every terrain change triggers a warm-started re-plan, so the agent's policy always reflects the current world. Dynamic hazards also interact with survival directly: a lava flow that spreads onto the agent's cell destroys it between its own moves. Fig.~\ref{fig:hazards} shows how substantially a terrain can evolve: after 20 hazard steps on the seed-42 map, 58 change events have moved gas clouds across the map and pulsed lava in and out of previously safe corridors. In the full seed-42 demonstration mission, 71 terrain-change events occur and the agent still collects its samples and survives.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.49\columnwidth]{hazards_before.png}\hfill
+  \includegraphics[width=0.49\columnwidth]{hazards_after.png}
+  \caption{Dynamic hazards on the seed-42 terrain: initial map (left) and the same map after 20 hazard steps and 58 change events (right). Gas clouds (green) have drifted and lava (red) has spread into previously safe cells while base, science, rock, and crater cells are untouched.}
+  \label{fig:hazards}
+\end{figure}
+
+\subsection{Mission Loop}
+
+Algorithm~\ref{alg:mission} shows how the pieces fit together into the mission loop. The agent repeatedly queries its policy, samples a real outcome from the transition model \eqref{eq:transition}, applies the collect-once rule, lets the hazards evolve, re-plans if anything changed, and checks the termination conditions: death, the 100-step budget, a coverage target, or an 8-step hold on one cell, which indicates the policy has parked the agent, normally at base, because no remaining objective justifies its risk. Fig.~\ref{fig:mission} shows a completed mission.
+
+\begin{algorithm}[t]
+  \caption{Mission loop with re-planning and dynamic hazards}
+  \label{alg:mission}
+  \begin{algorithmic}[1]
+    \STATE generate terrain; solve MDP; place agent at \textsc{base}
+    \WHILE{agent alive \AND step budget remains}
+      \STATE $a \leftarrow \pi(s)$; \quad sample $s' \sim P(\cdot \mid s, a)$; \quad move to $s'$
+      \IF{$s'$ is a \textsc{science} cell}
+        \STATE collect sample; convert cell to \textsc{safe}; re-plan $\pi$
+      \ENDIF
+      \STATE evolve hazards (gas drift, lava spread/cool)
+      \IF{terrain changed}
+        \STATE \textbf{if} agent's cell became \textsc{lava}: agent destroyed
+        \STATE \textbf{else}: re-plan $\pi$ (warm-started value iteration)
+      \ENDIF
+      \IF{coverage target reached \OR parked for 8 steps}
+        \STATE \textbf{break} \COMMENT{mission complete}
+      \ENDIF
+    \ENDWHILE
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.9\columnwidth]{final_map.png}
+  \caption{A completed mission (seed 42, dynamic hazards on). The solid route is the actual path taken by the agent from the base station ($\star$) to its final position ($\blacksquare$); gold stars mark collected science samples. Lava that spread during the mission is visible in the upper-left region.}
+  \label{fig:mission}
+\end{figure}
+
+\section{Implementation}\label{sec:implementation}
+
+The system is implemented in Python (about 1{,}900 lines) using \texttt{numpy}-adjacent standard tooling, \texttt{matplotlib} for all visualization~\cite{hunter2007}, and \texttt{pandas} for experiment aggregation~\cite{mckinney2010}. The repository follows the mandated layout: \texttt{main.py} runs the full pipeline; \texttt{support/} contains the modules; \texttt{data/} holds the configuration and saved terrains; \texttt{others/} holds the report, presentations, and demo video.
+
+\begin{itemize}
+  \item \texttt{terrain.py}: procedural generation, CSV persistence, and grid queries;
+  \item \texttt{mdp.py}: the MDP formulation, value iteration, and policy extraction;
+  \item \texttt{agent.py}: the policy-following explorer with stochastic outcome sampling, the collect-once rule, re-planning, and mission statistics;
+  \item \texttt{hazards.py}: the dynamic gas/lava model;
+  \item \texttt{simulation.py}: the mission loop and termination logic;
+  \item \texttt{visualization.py}: terrain, policy, and mission-map rendering;
+  \item \texttt{experiments.py}: the baseline comparison harness;
+  \item \texttt{demo\_video.py}: the one-minute demonstration video generator.
+\end{itemize}
+
+Every stochastic component (terrain generation, movement sampling, hazard evolution) is seeded, so every figure and number in this report can be regenerated exactly:
+
+\begin{verbatim}
+pip install -r requirements.txt
+python main.py               # full pipeline
+python main.py --static      # no dynamic hazards
+python support/experiments.py  # Table III, Fig. 6
+python support/demo_video.py   # 1-minute demo
+\end{verbatim}
+
+The two baseline agents are implemented as subclasses of the MDP explorer that override only action selection, guaranteeing that all three agents are measured by identical environment code. The full pipeline entry point, \texttt{main.py}, accepts \texttt{--seed}, \texttt{--size}, \texttt{--steps}, and \texttt{--static} arguments, prints the generated terrain and the initial policy, runs the mission, and renders the mission map of Fig.~\ref{fig:mission}.
+
+The repository follows the layout mandated by the course:
+
+\begin{verbatim}
+main.py            requirements.txt
+README.md
+data/     terrain_config.json,
+          saved terrain CSVs
+support/  terrain, mdp, agent, hazards,
+          simulation, visualization,
+          demo_video, experiments
+images/   committed figures and video
+outputs/  regenerated artifacts
+others/   final & update reports (PDF),
+          final & update slides (PPTX),
+          one-minute demo video
+\end{verbatim}
+
+\subsection{Development Process and Division of Work}
+
+The project was developed incrementally over the semester by four members with clearly separated responsibilities (Table~\ref{tab:work}), with each member's work merged through reviewed pull requests. The commit history reflects this staged development: terrain generation, then the MDP core and value iteration, then the agent and simulation, then visualization, then experiments, and finally the dynamic-hazard extension, the collect-once fix, and the report and presentation materials.
+
+\begin{table}[t]
+  \caption{Division of work.}
+  \label{tab:work}
+  \centering
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{ll}
+    \toprule
+    Member & Primary responsibility \\
+    \midrule
+    Shakil Ahmed   & Repository foundation, terrain generation, \\
+                   & MDP core, value iteration, integration \\
+    Fahim Foysal   & Explorer agent and simulation loop \\
+    Shefa Tabassum & Visualization and demo outputs \\
+    Tanvir Ahmed   & Experiments, baselines, performance \\
+                   & analysis, dynamic hazards, final materials \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Experimental Evaluation}\label{sec:experiments}
+
+\subsection{Setup}
+
+We compare three agents under identical conditions (the same terrains, the same stochastic transition model, the same reward accounting, the same collect-once rule, and the same termination logic):
+
+\begin{itemize}
+  \item \textbf{MDP}: follows the value-iteration policy with re-planning after each collected sample;
+  \item \textbf{Greedy}: breadth-first search toward the nearest unvisited cell, treating rock and lava as impassable but ignoring the softer costs of gas and craters: a classic coverage heuristic;
+  \item \textbf{Random}: a uniformly random movement direction each step.
+\end{itemize}
+
+Each agent runs one episode on each of 20 independently generated terrains (seeds 0 to 19) with a budget of 100 steps. We record total reward, coverage (fraction of walkable cells visited), hazard entries, science samples collected, survival, and steps taken. All runs use static terrain so that the comparison isolates decision quality; dynamic hazards are demonstrated separately in the mission of Fig.~\ref{fig:mission} and the demo video.
+
+\subsection{Results}
+
+Table~\ref{tab:results} reports the averages, and Fig.~\ref{fig:performance} the full comparison.
+
+\begin{table}[t]
+  \caption{Average performance over 20 random terrains.}
+  \label{tab:results}
+  \centering
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{lrrrrrr}
+    \toprule
+    Agent & Reward & Cov.\,\% & Hazards & Science & Surv.\,\% & Steps \\
+    \midrule
+    MDP    & $\mathbf{42.0}$ & $13.9$          & $\mathbf{1.9}$ & $\mathbf{3.5}$ & $\mathbf{60.0}$ & $21.1$ \\
+    Greedy & $-124.5$        & $\mathbf{29.3}$ & $9.0$          & $2.9$          & $30.0$          & $38.2$ \\
+    Random & $-179.5$        & $7.6$           & $3.8$          & $0.7$          & $15.0$          & $21.9$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{performance_plot.png}
+  \caption{MDP vs.\ Greedy vs.\ Random, averaged over 20 terrains: total reward, coverage, hazards entered, and survival rate.}
+  \label{fig:performance}
+\end{figure}
+
+\subsection{Discussion}
+
+\subsubsection{Reward and safety} The MDP agent is the only agent with positive average reward. The greedy baseline's deficit of $-124.5$ is not an implementation artifact but the direct cost of ignoring soft hazards: it enters $4.7\times$ as many hazard cells as the MDP agent and survives only 30\% of missions. The random agent, lacking any direction, collects almost no science and dies early in most maps.
+
+\subsubsection{The coverage trade-off} Greedy achieves the highest raw coverage (29.3\%), which is exactly what it optimizes, but coverage without survival is not useful exploration: a destroyed rover returns no more data. The MDP agent's lower coverage is a deliberate consequence of its reward model, which pays for science and safety, not for area.
+
+\subsubsection{Conservatism is optimal here} Qualitatively, the MDP agent collects the samples whose expected value justifies the risk of the journey and then parks at or near base. Some missions end with science left on the map; inspection of those maps shows the remaining samples fenced by lava such that the slip risk of the approach outweighs the $+20$ payoff under \eqref{eq:bellman}. This is the model behaving correctly, not a solver deficiency.
+
+\subsubsection{Efficiency per step} The step counts sharpen the picture. The MDP agent finishes in $21.1$ steps on average, barely more than the random agent's $21.9$ (most of which end in early death), while the greedy agent wanders for $38.2$. Per step taken, the MDP agent collects one science sample roughly every $6$ steps versus greedy's one per $13$; it is not merely safer but strictly more efficient at the mission's actual objective. Its short missions are also a termination effect: once every justifiable sample is collected, the parked-agent rule ends the episode rather than letting the agent wander and accumulate risk for no expected gain.
+
+\subsubsection{Variability across terrains} Because every terrain is an independent random draw, per-seed outcomes vary widely: on open maps the MDP agent clears every sample and returns to base, while on maps whose science spawns inside lava pockets it correctly abandons them. The aggregate 60\% survival is dominated by a specific failure mode, slip chains near unavoidable lava corridors between the base and the nearest cluster of objectives, which is precisely the residual risk that a risk-neutral objective accepts by design and that the risk-sensitive extension of Section~\ref{sec:limitations} would target.
+
+\subsubsection{Adaptation under dynamic hazards} Table~\ref{tab:dynamic} compares the same seed-42 mission with hazards off and on. With hazards enabled the terrain changes 71 times during the 24-step mission; the agent re-plans after each change, still collects both reachable samples, and returns alive. Its reward is in fact \emph{higher} in the dynamic run ($63$ vs.\ $41$) and it enters fewer hazards ($1$ vs.\ $2$), because a drifting gas cloud happened to vacate part of its route, an illustration that a re-planning agent can exploit favorable environmental change, not merely defend against unfavorable change.
+
+\begin{table}[t]
+  \caption{The seed-42 mission with dynamic hazards off and on.}
+  \label{tab:dynamic}
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    Metric & Static & Dynamic \\
+    \midrule
+    Steps taken            & 24  & 24 \\
+    Total reward           & 41  & 63 \\
+    Science collected      & 2   & 2  \\
+    Hazards entered        & 2   & 1  \\
+    Terrain-change events  & 0   & 71 \\
+    Survived               & yes & yes \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Demonstration video} A one-minute screen-capture demonstration accompanies this report in the repository (\texttt{others/demo\_video.mp4}). It shows the project running from the user's perspective: the full pipeline executing in a terminal (terrain generation, value iteration, the mission summary) followed by the generated mission map and the baseline-comparison outputs.
+
+\subsection{Threats to Validity}
+
+\subsubsection{Stochastic outcomes} Every episode involves stochastic movement, so any single run is noisy. We mitigate this by averaging over 20 independent terrains with fixed seeds per run; the ranking of the three agents is stable and the gaps are large relative to per-seed variation, but confidence intervals over a larger seed pool would strengthen the quantitative claims.
+
+\subsubsection{Baseline strength} The greedy baseline is a genuine coverage heuristic but not a tuned competitor; a stronger baseline (e.g., A$^{*}$ to the nearest science point with hazard-weighted edge costs) would narrow the reward gap, though it would effectively re-derive part of the MDP's cost reasoning by hand.
+
+\subsubsection{Static-terrain comparison} The baseline comparison runs on static terrain so that it isolates decision quality under uncertainty; extending the harness to dynamic terrain would additionally measure each agent's adaptability, and we expect the re-planning MDP agent's advantage to widen there, since neither baseline reacts to terrain change at all.
+
+\subsubsection{Simulation fidelity} The grid world abstracts away continuous motion, sensing noise, and terrain gradation. The conclusions are therefore about decision-making architecture, not about field-ready volcanic robotics.
+
+\section{Limitations and Future Work}\label{sec:limitations}
+
+\subsubsection{Hand-specified dynamics} Movement noise and hazard-evolution probabilities are fixed constants. Estimating them from data, or exposing them in the configuration file, would make the model richer, and a sensitivity analysis over slip probability would quantify how robust the policy is to model misspecification.
+
+\subsubsection{Position-only state} The state contains only the agent's position; remaining science and collected energy are handled outside the MDP through re-planning. Folding them into the state (e.g., position $\times$ remaining-science bitmask) would let the planner reason about them exactly, at exponential state-space cost; factored or approximate methods would then be appropriate.
+
+\subsubsection{Risk neutrality} Value iteration optimizes expected reward, so a 60\% survival rate can be optimal even when a more risk-averse operator would prefer a safer policy. Risk-sensitive objectives, such as variance penalties or chance constraints on survival, are a natural extension.
+
+\subsubsection{Full observability} The agent currently sees the whole map, which is why the priced \textsc{scan} action is rarely chosen. A fog-of-war variant in which \textsc{scan} reveals nearby cells would turn the problem into a POMDP~\cite{kaelbling1998} and give the sensing action a real role.
+
+\subsubsection{Scale} Exact value iteration is comfortable at $10 \times 10$ and remains interactive at the $20 \times 20$ size supported by the \texttt{--size} flag, but per-step re-planning would eventually become the bottleneck on much larger maps. Prioritized sweeping, which propagates only the value changes caused by a local terrain edit, is the natural optimization, since our re-plans are triggered by exactly such local edits.
+
+\subsubsection{Energy and communication} A field rover carries a finite battery and must periodically return within communication range of its base. Adding an energy budget consumed per step (and recharged at base) would produce the characteristic ``sortie'' behavior of real exploration missions (venture out, sample, return) and gives the base station's $+5$ reward a physical interpretation rather than a purely terminal one.
+
+\subsubsection{Multi-agent teams} A team of rovers exploring the same terrain raises coordination questions (partitioning the map, avoiding redundant coverage, sharing hazard observations) that could be modeled initially as independent MDPs with a shared collect-once state, and later as a decentralized planning problem.
+
+\subsection{Lessons Learned}
+
+Two lessons stand out from the development process. First, \emph{the reward model is the specification}: the science-camping behavior we observed mid-project was not a bug in value iteration but the optimal policy for the reward model we had actually written, and the fix (collect-once with re-planning) belonged in the environment rules, not in the solver. Second, \emph{shared measurement code is what makes comparisons meaningful}: implementing the baselines as one-method subclasses of the same agent eliminated an entire class of evaluation bugs and made the experimental results straightforward to trust and reproduce.
+
+\section{Conclusion}\label{sec:conclusion}
+
+We presented a complete MDP-based system for autonomous exploration of hazardous volcanic terrain: procedural environment generation, an exact value-iteration planner over a stochastic movement model, a collect-once science rule with warm-started on-line re-planning, dynamic hazards that force adaptation mid-mission, and a reproducible three-agent experimental comparison. The MDP agent decisively outperforms random and greedy baselines on reward, hazard avoidance, and survival, while the baselines illustrate precisely what is lost when uncertainty and soft hazard costs are ignored. The project demonstrates, end to end, that classical decision-theoretic planning remains a practical and interpretable foundation for autonomy in dangerous, changing environments.
+
+\section*{Acknowledgment of Tools}
+
+The implementation uses Python with the \texttt{matplotlib}~\cite{hunter2007} and \texttt{pandas}~\cite{mckinney2010} libraries; videos are encoded with FFmpeg. Claude Code (Anthropic's Claude AI assistant)~\cite{claude} was used as an AI tool to assist with code review, refactoring, and document preparation; all design decisions, models, and results were reviewed and validated by the group members.
+
+\begin{thebibliography}{9}
+
+\bibitem{bellman1957} R.~Bellman, \emph{Dynamic Programming}. Princeton, NJ: Princeton Univ. Press, 1957.
+
+\bibitem{puterman1994} M.~L. Puterman, \emph{Markov Decision Processes: Discrete Stochastic Dynamic Programming}. New York: Wiley, 1994.
+
+\bibitem{suttonbarto2018} R.~S. Sutton and A.~G. Barto, \emph{Reinforcement Learning: An Introduction}, 2nd~ed. Cambridge, MA: MIT Press, 2018.
+
+\bibitem{russellnorvig2021} S.~Russell and P.~Norvig, \emph{Artificial Intelligence: A Modern Approach}, 4th~ed. Hoboken, NJ: Pearson, 2021.
+
+\bibitem{kaelbling1998} L.~P. Kaelbling, M.~L. Littman, and A.~R. Cassandra, ``Planning and acting in partially observable stochastic domains,'' \emph{Artificial Intelligence}, vol.~101, no.~1--2, pp. 99--134, 1998.
+
+\bibitem{bares1999dante} J.~E. Bares and D.~S. Wettergreen, ``Dante II: Technical description, results, and lessons learned,'' \emph{Int. J. Robotics Research}, vol.~18, no.~7, pp. 621--649, 1999.
+
+\bibitem{bresina2002} J.~L. Bresina \emph{et al.}, ``Planning under continuous time and resource uncertainty: A challenge for AI,'' in \emph{Proc. 18th Conf. Uncertainty in Artificial Intelligence (UAI)}, 2002, pp. 77--84.
+
+\bibitem{thrun2005} S.~Thrun, W.~Burgard, and D.~Fox, \emph{Probabilistic Robotics}. Cambridge, MA: MIT Press, 2005.
+
+\bibitem{lavalle2006} S.~M. LaValle, \emph{Planning Algorithms}. Cambridge, UK: Cambridge Univ. Press, 2006.
+
+\bibitem{hunter2007} J.~D. Hunter, ``Matplotlib: A 2D graphics environment,'' \emph{Computing in Science \& Engineering}, vol.~9, no.~3, pp. 90--95, 2007.
+
+\bibitem{mckinney2010} W.~McKinney, ``Data structures for statistical computing in Python,'' in \emph{Proc. 9th Python in Science Conf. (SciPy)}, 2010, pp. 56--61.
+
+\bibitem{claude} Anthropic, ``Claude Code (AI assistant),'' 2026. [Online]. Available: \url{https://claude.com/claude-code}
+
+\end{thebibliography}
+
+\end{document}
