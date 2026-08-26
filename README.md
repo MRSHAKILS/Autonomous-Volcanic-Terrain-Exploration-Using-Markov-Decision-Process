@@ -308,6 +308,14 @@ python support/make_slides.py        # regenerate the presentation PPTX files
 python support/pptx_to_doc.py        # convert the PPTX decks to Word (.docx)
 ```
 
+## Running Tests
+
+Unit tests cover the config validation, the explorer agent, the simulation loop, and the dynamic hazards module. They use only the Python standard library (`unittest`), so no extra dependencies are needed:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 ## Known Limitations and Future Work
 
 - Movement noise and hazard dynamics use fixed hand-chosen probabilities; they could be learned or made configurable.
