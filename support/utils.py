@@ -6,9 +6,9 @@ from pathlib import Path
 
 def ensure_directory_exists(directory_path: str | Path) -> Path:
     """Create a directory if it does not already exist and return its path."""
-    path = Path(directory_path)
-    path.mkdir(parents=True, exist_ok=True)
-    return path
+    resolved_path = Path(directory_path)
+    resolved_path.mkdir(parents=True, exist_ok=True)
+    return resolved_path
 
 
 def print_section_header(title: str) -> None:
@@ -21,10 +21,10 @@ def print_section_header(title: str) -> None:
 
 def load_json(file_path: str | Path) -> dict:
     """Load and return JSON data from a file."""
-    path = Path(file_path)
+    json_path = Path(file_path)
 
     try:
-        with path.open("r", encoding="utf-8") as file:
+        with json_path.open("r", encoding="utf-8") as file:
             return json.load(file)
     except json.JSONDecodeError as error:
-        raise ValueError(f"Invalid JSON format in file: {path}") from error
+        raise ValueError(f"Invalid JSON format in file: {json_path}") from error

@@ -145,9 +145,9 @@ if __name__ == "__main__":
     terrain.print_grid()
 
     hazards = DynamicHazards(terrain, seed=42)
-    for step_number in range(1, 21):
+    for tick in range(1, 21):
         if hazards.step():
-            print(f"Step {step_number}: terrain changed (total events: {hazards.total_events})")
+            print(f"Step {tick}: terrain changed (total events: {hazards.total_events})")
 
     print()
     print("Terrain after 20 dynamic-hazard steps:")

@@ -129,8 +129,8 @@ if __name__ == "__main__":
         terrain = Terrain(seed=42)
         terrain.generate()
 
-        mode = "dynamic hazards" if dynamic else "static terrain"
-        print_section_header(f"Simulation Start ({mode})")
+        run_mode_label = "dynamic hazards" if dynamic else "static terrain"
+        print_section_header(f"Simulation Start ({run_mode_label})")
         print(f"Grid size: {terrain.rows}x{terrain.cols}")
 
         simulation = Simulation(terrain, max_steps=100, coverage_target=0.60, seed=42, dynamic_hazards=dynamic)

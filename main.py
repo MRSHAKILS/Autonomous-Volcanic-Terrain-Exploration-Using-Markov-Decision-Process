@@ -103,9 +103,9 @@ def main() -> None:
     print()
     print_cell_counts(terrain)
 
-    csv_path = terrain_csv_path(args.seed)
-    terrain.save_to_csv(csv_path)
-    print(f"Generated terrain saved to: {csv_path}")
+    terrain_output_path = terrain_csv_path(args.seed)
+    terrain.save_to_csv(terrain_output_path)
+    print(f"Generated terrain saved to: {terrain_output_path}")
 
     print_section_header("Step 2: MDP Value Iteration and Policy")
     simulation = Simulation(
