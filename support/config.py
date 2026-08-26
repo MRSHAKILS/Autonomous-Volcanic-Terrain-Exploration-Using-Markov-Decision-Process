@@ -60,19 +60,19 @@ def get_mdp_parameters(config_path: Path = CONFIG_PATH) -> dict:
         return _copy_default_mdp_parameters()
 
     mdp_parameters = config.get("mdp_parameters", {})
-    merged = _copy_default_mdp_parameters()
+    resolved_parameters = _copy_default_mdp_parameters()
 
     if "gamma" in mdp_parameters:
-        merged["gamma"] = float(mdp_parameters["gamma"])
+        resolved_parameters["gamma"] = float(mdp_parameters["gamma"])
 
     configured_movement = mdp_parameters.get("movement_probabilities", {})
     for key in MOVEMENT_PROBABILITY_KEYS:
         if key in configured_movement:
-            merged["movement_probabilities"][key] = float(configured_movement[key])
+            resolved_parameters["movement_probabilities"][key] = float(configured_movement[key])
 
-    _validate_movement_probabilities(merged["movement_probabilities"])
+    _validate_movement_probabilities(resolved_parameters["movement_probabilities"])
 
-    return merged
+    return resolved_parameters
 
 
 def _copy_default_mdp_parameters() -> dict:
