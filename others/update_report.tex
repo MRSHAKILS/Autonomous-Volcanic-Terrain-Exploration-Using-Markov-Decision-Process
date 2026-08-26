@@ -35,7 +35,7 @@ Because the task is sequential decision-making under uncertainty, we model it as
 States are walkable grid cells; actions are the four movement directions plus \textsc{stay} and \textsc{scan}; movement succeeds as intended with probability $0.75$, drifts sideways with probability $0.10$ each, and stalls with probability $0.05$; rewards range from $+20$ (science) to $-100$ (lava, fatal); and $\gamma = 0.90$.
 % Summary of contributions completed by each group member
 \section{Progress by Member}
-
+% Terrain generation and MDP implementation
 \subsubsection{Member 1: terrain and MDP core} Repository structure and configuration system; a seeded procedural terrain generator over seven cell types with hazard density capped at $0.30$ and CSV save/load; the full MDP formulation; value iteration and optimal policy extraction.
 
 \subsubsection{Member 2: agent and simulation} An \texttt{MDPExplorerAgent} that starts at the base station, queries the policy, and samples real outcomes from the transition model; tracking of reward, hazards entered, science collected, and survival; a simulation loop with a step budget and coverage target and a mission summary.
