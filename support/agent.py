@@ -124,10 +124,10 @@ class MDPExplorerAgent:
     def _sample_next_state(self, action: str) -> tuple[int, int]:
         """Randomly sample a real outcome from the action's transition probabilities."""
         transitions = self.mdp.transition_probabilities(self.position, action)
-        next_states = list(transitions.keys())
-        weights = list(transitions.values())
+        possible_states = list(transitions.keys())
+        state_weights = list(transitions.values())
 
-        return self.rng.choices(next_states, weights=weights, k=1)[0]
+        return self.rng.choices(possible_states, weights=state_weights, k=1)[0]
 
     def _update_trackers(self, next_state: tuple[int, int]) -> None:
         """Update hazard, science, and survival tracking for the new cell."""
