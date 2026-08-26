@@ -87,7 +87,11 @@ States are walkable grid cells; actions are the four movement directions plus \t
 \section{Preliminary Observations}
 
 The value-iteration policy already routes visibly around lava and craters and toward science points, and the MDP agent outperforms both baselines on reward and survival in the preliminary runs. One issue is identified and scheduled for the next phase: because a science cell pays its reward on every entry, the optimal policy can ``camp'' on a single science cell; we will fix this with a collect-once rule and on-line re-planning.
-
+% The repository statement documents the intended reproducibility
+% and collaboration workflow. Per-member branches allow individual
+% components to be developed separately, while reviewed pull
+% requests provide an explicit integration point before changes
+% enter the shared project branch.
 \section{Plan to the Final Submission}
 
 \begin{enumerate}
