@@ -3,20 +3,8 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{amsmath}
-\usepackage{fancyhdr}
 
 \graphicspath{{../images/}}
-
-% Course header above the top margin of the first page (per course manual:
-% course code & section, project group number, names and IDs of all members).
-\fancypagestyle{firstpageheader}{%
-  \fancyhf{}%
-  \renewcommand{\headrulewidth}{0pt}%
-  \fancyhead[C]{\footnotesize
-    CSE 440 (Section 1) \quad$\cdot$\quad Project Group 5 \quad$\cdot$\quad
-    Shakil Ahmed (ID: 2XXXXXXXXX), Fahim Foysal (ID: 2XXXXXXXXX), Shefa Tabassum (ID: 2XXXXXXXXX), Tanvir Ahmed (ID: 2XXXXXXXXX)}%
-}
-\setlength{\headheight}{14pt}
 
 \begin{document}
 
@@ -24,13 +12,13 @@
 {\Large Project Update Report (Update 1)}}
 
 \author{
-  \IEEEauthorblockN{Shakil Ahmed, Fahim Foysal, Shefa Tabassum, and Tanvir Ahmed}
+  \IEEEauthorblockN{Shakil Ahmed (2221452042), Fahim Foysal (2233594642),\\
+  Shefa Tabassum (2232993042), and Tanvir Ahmed (2231047642)}
   \IEEEauthorblockA{Group 5, CSE 440, Artificial Intelligence, Section 1\\
   North South University \quad$\cdot$\quad Instructor: Dr.\ Mohammad Shifat-E-Rabbi}
 }
 
 \maketitle
-\thispagestyle{firstpageheader}
 
 \begin{abstract}
 This update reports the state of our semester project at the midpoint. The project models autonomous exploration of hazardous volcanic terrain as a Markov Decision Process (MDP). As of this update, all four members' Update-1 work is merged: a seeded procedural terrain generator, the complete MDP formulation with value iteration and policy extraction, a policy-following explorer agent with a simulation loop, matplotlib terrain visualization, and a three-agent baseline experiment framework with CSV and plot outputs. We summarize the design, show preliminary results, and state the plan to the final submission.
