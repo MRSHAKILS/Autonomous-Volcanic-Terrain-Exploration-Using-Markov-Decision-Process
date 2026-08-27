@@ -171,7 +171,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Value iteration
 - Optimal policy extraction
 
-### Member 2 â€” Agent and Simulation
+### Member 2 Agent and Simulation
 
 - `MDPExplorerAgent`
 - BASE-position initialization
@@ -181,7 +181,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Reward, hazard, science-point, and survival tracking
 - Mission summary and simulation loop
 
-### Member 3 â€” Visualization
+### Member 3 Visualization
 
 - Matplotlib-based terrain rendering
 - Distinct colors for all seven terrain types
