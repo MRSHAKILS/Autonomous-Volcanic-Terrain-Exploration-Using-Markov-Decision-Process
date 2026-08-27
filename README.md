@@ -189,7 +189,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Saved visualization output
 - Terrain examples generated with different random seeds
 
-### Member 4 â€” Experiments
+### Member 4 Experiments
 
 - MDP, random, and greedy comparison structure
 - Shared experiment metrics
