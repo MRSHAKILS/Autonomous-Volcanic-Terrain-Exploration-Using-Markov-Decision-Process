@@ -138,8 +138,7 @@ volcanic-mdp-explorer/
     |-- final_report.tex
     |-- final_report.pdf        (8-page IEEE double-column final report)
     |-- final_presentation.pptx
-    |-- update_report.tex
-    |-- update_report.pdf       (2-page IEEE double-column update report)
+    |-- Update_1 Fahim_foysal_2233594642.pdf (Member 2 individual update report)
     `-- demo_video.mp4          (one-minute project demo run)
 ```
 
@@ -330,4 +329,4 @@ Running the commands above regenerates every artifact locally in `outputs/` (git
 - `outputs/final_map.png`
 - `outputs/policy_map.png`
 
-Committed copies of the final visuals live in `images/`. The course deliverables live in `others/`: the 8-page IEEE-format final report (PDF + LaTeX source), the final presentation PPTX, the 2-page update report (PDF + LaTeX source), and the one-minute demo video.
+Committed copies of the final visuals live in `images/`. The course deliverables live in `others/`: the 8-page IEEE-format final report (PDF + LaTeX source), the final presentation PPTX, each member's individual update report, and the one-minute demo video.
