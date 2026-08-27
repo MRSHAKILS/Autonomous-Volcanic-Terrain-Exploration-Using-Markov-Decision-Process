@@ -1,5 +1,3 @@
 numpy
 matplotlib
 pandas
-python-pptx
-python-docx

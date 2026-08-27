@@ -13,7 +13,7 @@
 \begin{document}
 
 \title{Autonomous Volcanic Terrain Exploration\\Using a Markov Decision Process}
-
+% Summary of contributions completed by each group member
 \author{
   \IEEEauthorblockN{Shakil Ahmed (2221452042), Fahim Foysal (2233594642),\\
   Shefa Tabassum (2232993042), and Tanvir Ahmed (2231047642)}
@@ -23,6 +23,7 @@
 }
 
 \maketitle
+% Midpoint progress summary
 
 \begin{abstract}
 Volcanic environments are hazardous, uncertain, and largely inaccessible to humans, which makes them a natural target for autonomous robotic exploration. This project designs, implements, and evaluates a complete decision-theoretic exploration system for a simulated volcanic terrain. The environment is a procedurally generated grid containing lava, craters, gas-emission zones, impassable rock, science points, and a base station. The exploration task is modeled as a Markov Decision Process (MDP) with stochastic movement, and solved exactly with value iteration. Two extensions move the system beyond a textbook MDP: a \emph{collect-once} science rule with on-line re-planning, which prevents the agent from exploiting a single high-reward cell, and \emph{dynamic hazards} (drifting gas clouds and spreading, cooling lava flows) that force the agent to adapt its plan while the mission is underway. We evaluate the MDP agent against random and greedy nearest-unvisited baselines on 20 independently generated terrains. The MDP agent is the only agent with positive average reward ($+42.0$ versus $-124.5$ and $-179.5$), doubles the survival rate of the greedy baseline (60\% versus 30\%), and enters roughly one-fifth as many hazard cells, demonstrating that sequential decision-theoretic planning is an effective and practical foundation for exploration in hazardous, changing environments.
@@ -75,7 +76,7 @@ Three families of methods could solve our planning problem, and it is worth bein
 \subsection{Related Work}
 
 MDPs and their partially observable generalization (POMDPs)~\cite{kaelbling1998} are standard models for robot navigation and exploration under uncertainty~\cite{thrun2005, lavalle2006}. Grid-world MDP formulations with directional slip are a canonical benchmark in AI education and research~\cite{russellnorvig2021}, and decision-theoretic planning has been applied to planetary-rover activity planning~\cite{bresina2002}, where, as in our setting, the robot must weigh scientific reward against resource and safety constraints. Volcanic robotics specifically has been explored with the Dante~II robot~\cite{bares1999dante}, which descended into an active crater to sample gases, motivating exactly the class of autonomy this project simulates. Our project's contribution is educational and integrative: a single, fully reproducible system that connects procedural environment generation, exact MDP planning, on-line re-planning, and a controlled baseline comparison.
-
+% Core problem formulation and solution approach
 \section{Problem Statement}\label{sec:problem}
 
 \subsection{Environment}

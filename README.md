@@ -4,7 +4,7 @@
 
 | Item       | Details                             |
 | ---------- | ----------------------------------- |
-| Course     | CSE 440 â€” Artificial Intelligence |
+| Course     | CSE 440 Artificial Intelligence |
 | Section    | 1                                   |
 | Group      | 5                                   |
 | Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb]  |
@@ -125,9 +125,6 @@ volcanic-mdp-explorer/
 |   |-- hazards.py
 |   |-- simulation.py
 |   |-- visualization.py
-|   |-- demo_video.py
-|   |-- make_slides.py
-|   |-- pptx_to_doc.py
 |   `-- experiments.py
 |-- outputs/                  (generated locally, gitignored)
 |   |-- .gitkeep
@@ -141,11 +138,7 @@ volcanic-mdp-explorer/
     |-- final_report.tex
     |-- final_report.pdf        (8-page IEEE double-column final report)
     |-- final_presentation.pptx
-    |-- final_presentation.docx (Word version of the final deck)
-    |-- update_report.tex
-    |-- update_report.pdf       (2-page IEEE double-column update report)
-    |-- update_presentation.pptx
-    |-- update_presentation.docx (Word version of the update deck)
+    |-- Update_1 Fahim_foysal_2233594642.pdf (Member 2 individual update report)
     `-- demo_video.mp4          (one-minute project demo run)
 ```
 
@@ -160,7 +153,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Animated demo video generation
 - Final report and presentation slides in `others/`
 
-### Member 1 â€” MDP Core
+### Member 1 MDP Core
 
 - Repository and project structure
 - Configuration system
@@ -171,7 +164,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Value iteration
 - Optimal policy extraction
 
-### Member 2 â€” Agent and Simulation
+### Member 2 Agent and Simulation
 
 - `MDPExplorerAgent`
 - BASE-position initialization
@@ -181,7 +174,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Reward, hazard, science-point, and survival tracking
 - Mission summary and simulation loop
 
-### Member 3 â€” Visualization
+### Member 3 Visualization
 
 - Matplotlib-based terrain rendering
 - Distinct colors for all seven terrain types
@@ -189,7 +182,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Saved visualization output
 - Terrain examples generated with different random seeds
 
-### Member 4 â€” Experiments
+### Member 4 Experiments
 
 - MDP, random, and greedy comparison structure
 - Shared experiment metrics
@@ -272,10 +265,8 @@ The dependency list includes:
 - `numpy`
 - `matplotlib`
 - `pandas`
-- `python-pptx` (only for regenerating the presentation files)
-- `python-docx` (only for converting the presentations to Word)
 
-Generating `outputs/demo_video.mp4` also uses the `ffmpeg` command-line tool if it is installed; without it, the demo script saves a GIF instead. The LaTeX reports in `others/` compile with any modern TeX engine (e.g., `tectonic others/final_report.tex`).
+The LaTeX reports in `others/` compile with any modern TeX engine (e.g., `tectonic others/final_report.tex`).
 
 ## How to Run
 
@@ -302,10 +293,7 @@ python support/agent.py              # short agent rollout
 python support/simulation.py         # simulation loop, static and dynamic runs
 python support/hazards.py            # watch the terrain evolve for 20 steps
 python support/visualization.py      # render the mission map with the real path
-python support/demo_video.py         # generate the one-minute demo-run video
 python support/experiments.py        # MDP vs Random vs Greedy comparison
-python support/make_slides.py        # regenerate the presentation PPTX files
-python support/pptx_to_doc.py        # convert the PPTX decks to Word (.docx)
 ```
 
 ## Running Tests
@@ -340,6 +328,5 @@ Running the commands above regenerates every artifact locally in `outputs/` (git
 - `outputs/performance_plot.png`
 - `outputs/final_map.png`
 - `outputs/policy_map.png`
-- `outputs/demo_video.mp4`
 
-Committed copies of the final visuals live in `images/`. The course deliverables live in `others/`: the 8-page IEEE-format final report (PDF + LaTeX source), the final presentation PPTX, the 2-page update report (PDF + LaTeX source), the update presentation PPTX, and the one-minute demo video.
+Committed copies of the final visuals live in `images/`. The course deliverables live in `others/`: the 8-page IEEE-format final report (PDF + LaTeX source), the final presentation PPTX, each member's individual update report, and the one-minute demo video.
