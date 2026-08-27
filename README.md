@@ -160,7 +160,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Animated demo video generation
 - Final report and presentation slides in `others/`
 
-### Member 1 â€” MDP Core
+### Member 1 MDP Core
 
 - Repository and project structure
 - Configuration system
