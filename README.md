@@ -125,9 +125,6 @@ volcanic-mdp-explorer/
 |   |-- hazards.py
 |   |-- simulation.py
 |   |-- visualization.py
-|   |-- demo_video.py
-|   |-- make_slides.py
-|   |-- pptx_to_doc.py
 |   `-- experiments.py
 |-- outputs/                  (generated locally, gitignored)
 |   |-- .gitkeep
@@ -272,10 +269,8 @@ The dependency list includes:
 - `numpy`
 - `matplotlib`
 - `pandas`
-- `python-pptx` (only for regenerating the presentation files)
-- `python-docx` (only for converting the presentations to Word)
 
-Generating `outputs/demo_video.mp4` also uses the `ffmpeg` command-line tool if it is installed; without it, the demo script saves a GIF instead. The LaTeX reports in `others/` compile with any modern TeX engine (e.g., `tectonic others/final_report.tex`).
+The LaTeX reports in `others/` compile with any modern TeX engine (e.g., `tectonic others/final_report.tex`).
 
 ## How to Run
 
@@ -302,10 +297,7 @@ python support/agent.py              # short agent rollout
 python support/simulation.py         # simulation loop, static and dynamic runs
 python support/hazards.py            # watch the terrain evolve for 20 steps
 python support/visualization.py      # render the mission map with the real path
-python support/demo_video.py         # generate the one-minute demo-run video
 python support/experiments.py        # MDP vs Random vs Greedy comparison
-python support/make_slides.py        # regenerate the presentation PPTX files
-python support/pptx_to_doc.py        # convert the PPTX decks to Word (.docx)
 ```
 
 ## Running Tests
