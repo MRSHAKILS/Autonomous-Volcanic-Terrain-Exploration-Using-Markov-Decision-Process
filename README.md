@@ -4,7 +4,7 @@
 
 | Item       | Details                             |
 | ---------- | ----------------------------------- |
-| Course     | CSE 440 â€” Artificial Intelligence |
+| Course     | CSE 440 Artificial Intelligence |
 | Section    | 1                                   |
 | Group      | 5                                   |
 | Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb]  |
@@ -157,7 +157,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Animated demo video generation
 - Final report and presentation slides in `others/`
 
-### Member 1 â€” MDP Core
+### Member 1 MDP Core
 
 - Repository and project structure
 - Configuration system
@@ -168,7 +168,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Value iteration
 - Optimal policy extraction
 
-### Member 2 â€” Agent and Simulation
+### Member 2 Agent and Simulation
 
 - `MDPExplorerAgent`
 - BASE-position initialization
@@ -178,7 +178,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Reward, hazard, science-point, and survival tracking
 - Mission summary and simulation loop
 
-### Member 3 â€” Visualization
+### Member 3 Visualization
 
 - Matplotlib-based terrain rendering
 - Distinct colors for all seven terrain types
@@ -186,7 +186,7 @@ Update 1 code from all four members was merged, and the final update completes t
 - Saved visualization output
 - Terrain examples generated with different random seeds
 
-### Member 4 â€” Experiments
+### Member 4 Experiments
 
 - MDP, random, and greedy comparison structure
 - Shared experiment metrics
