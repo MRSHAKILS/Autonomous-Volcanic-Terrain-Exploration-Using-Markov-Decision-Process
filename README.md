@@ -4,7 +4,7 @@
 
 | Item       | Details                             |
 | ---------- | ----------------------------------- |
-| Course     | CSE 440 â€” Artificial Intelligence |
+| Course     | CSE 440 Artificial Intelligence |
 | Section    | 1                                   |
 | Group      | 5                                   |
 | Instructor | Dr. Mohammad Shifat-E-Rabbi [MSRb]  |
